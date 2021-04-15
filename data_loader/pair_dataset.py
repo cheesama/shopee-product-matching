@@ -48,7 +48,7 @@ class ProductPairDataset(Dataset):
         return len(self.products_frame)
 
     def __getitem__(self, index):
-        image = io.imread(root_dir + os.sep + self.products_frame.iloc[index]["image"])
+        image = io.imread(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
         label = self.products_frame.iloc[index]["label_group"]
         image = self.transform(image)
         label = torch.LongTensor([int(label)])
