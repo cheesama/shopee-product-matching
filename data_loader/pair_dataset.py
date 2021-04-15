@@ -9,14 +9,14 @@ import pandas as pd
 import argparse
 
 class ProductPairDataset(Dataset):
-    def __init__(self, csv_file, root_dir, train_mode=True, transform=None):
+    def __init__(self, df, root_dir, train_mode=True, transform=None):
         """
         Args:
-                csv_file (string): Path to the csv file with annotations.
-                root_dir (string): Directory with all the images.
+                df (DataFrame): part of entire dataframe
+                root_dir (str): root image path
                 transform (callable, optional): Optional transform to be applied on a sample.
         """
-        self.products_frame = pd.read_csv(csv_file)
+        self.products_frame = df
         self.root_dir = root_dir
 
         if transform is not None:
@@ -49,6 +49,7 @@ class ProductPairDataset(Dataset):
 
     def __getitem__(self, index):
         image = io.imread(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
+        print (self.products_frame.iloc[index])
         label = self.products_frame.iloc[index]["label_group"]
         image = self.transform(image)
         label = torch.LongTensor([int(label)])

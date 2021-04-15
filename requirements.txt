@@ -4,3 +4,4 @@ torch
 pytorch-lightning
 torchvision
 scikit-image
+scikit-learn
