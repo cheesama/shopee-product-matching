@@ -8,6 +8,8 @@ from data_loader.pair_dataset import ProductPairDataset
 import pytorch_lightning as pl
 import torch
 import argparse
+import pandas as pd
+import multiprocessing
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -41,20 +43,20 @@ if __name__ == "__main__":
     dataset_df = shuffle(dataset_df)
 
     train_dataset = ProductPairDataset(
-        df=dataset_df[: int(len(dataset_df) * args.portion)],
+        df=dataset_df[: int(len(dataset_df) * args.train_portion)],
         root_dir=args.train_root_dir,
     )
-    train_loader = DataLoader(train_dataset, batch_size=args.batch)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count())
 
     valid_dataset = ProductPairDataset(
-        df=dataset_df[int(len(dataset_df) * args.portion) :],
+        df=dataset_df[int(len(dataset_df) * args.train_portion) :],
         root_dir=args.train_root_dir,
         train_mode=False,
     )
-    valid_loader = DataLoader(valid_dataset, batch_size=args.batch)
+    valid_loader = DataLoader(valid_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count())
 
     # Initialize a trainer
-    trainer = pl.Trainer(gpus=torch.cuda.device_count(), progress_bar_refresh_rate=20)
+    trainer = pl.Trainer(gpus=torch.cuda.device_count(), progress_bar_refresh_rate=1, accelerator='ddp')
 
     # Train the model ⚡
     trainer.fit(product_encoder, train_loader, valid_loader)
