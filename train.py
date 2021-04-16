@@ -19,6 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("--feature_dim", default=256)
 
     # training parameters
+    parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--batch", default=32)
     parser.add_argument("--margin", default=0.5)
@@ -46,17 +47,26 @@ if __name__ == "__main__":
         df=dataset_df[: int(len(dataset_df) * args.train_portion)],
         root_dir=args.train_root_dir,
     )
-    train_loader = DataLoader(train_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count())
+    train_loader = DataLoader(
+        train_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count()
+    )
 
     valid_dataset = ProductPairDataset(
         df=dataset_df[int(len(dataset_df) * args.train_portion) :],
         root_dir=args.train_root_dir,
         train_mode=False,
     )
-    valid_loader = DataLoader(valid_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count())
+    valid_loader = DataLoader(
+        valid_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count()
+    )
 
     # Initialize a trainer
-    trainer = pl.Trainer(gpus=torch.cuda.device_count(), progress_bar_refresh_rate=1, accelerator='ddp')
+    trainer = pl.Trainer(
+        gpus=torch.cuda.device_count(),
+        progress_bar_refresh_rate=1,
+        accelerator="ddp",
+        max_epochs=args.epochs,
+    )
 
     # Train the model ⚡
     trainer.fit(product_encoder, train_loader, valid_loader)
