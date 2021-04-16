@@ -11,7 +11,7 @@ import pytorch_lightning as pl
 class ProductFeatureNet(nn.Module):
     def __init__(self, backbone_net: str, feature_dim=256):
         super(ProductFeatureNet, self).__init__()
-        
+
         self.backbone_net = eval(backbone_net)(pretrained=True)
         self.feature_layer = nn.Linear(
             self.backbone_net.fc.out_features, feature_dim, bias=False
@@ -43,13 +43,13 @@ class ProductFeatureEncoder(pl.LightningModule):
     def configure_optimizers(self):
         optim = torch.optim.Adam(self.parameters(), lr=self.lr)
         return {
-            'optimizer': optim,
-            'lr_scheduler': ReduceLROnPlateau(optim, patience=1, threshold=1e-7),
-            'monitor': 'val_loss'
+            "optimizer": optim,
+            "lr_scheduler": ReduceLROnPlateau(optim, patience=1, threshold=1e-7),
+            "monitor": "val_loss",
         }
 
     def training_step(self, train_batch, batch_idx):
-        images, labels = train_batch
+        _, images, labels = train_batch
 
         features = self.model(images)
 
@@ -67,7 +67,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         return similarity_loss
 
     def validation_step(self, validation_batch, batch_idx):
-        images, labels = validation_batch
+        posting_ids, images, labels = validation_batch
 
         features = self.model(images)
 
@@ -82,4 +82,4 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         self.log("val_loss", similarity_loss, prog_bar=True)
 
-        return similarity_loss
+        return {'posting_ids': posting_ids, 'features': features, 'val_loss': similarity_loss}
