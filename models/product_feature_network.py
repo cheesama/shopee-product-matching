@@ -29,7 +29,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, margin=0.5, csv_file=None):
+    def __init__(self, model, lr=1e-3, margin=0.5):
         super().__init__()
 
         self.save_hyperparameters()
@@ -93,13 +93,3 @@ class ProductFeatureEncoder(pl.LightningModule):
             "val_loss": similarity_loss,
         }
 
-    def validation_epoch_end(self, outputs):
-        if self.csv_file is not None:
-            print (outputs)
-
-            valid_df = pd.read_csv(self.csv_file)
-
-            self.logger.experiment.add_embedding(
-                torch.stack([x["features"] for x in outputs]),
-                torch.stack([x["labels"] for x in outputs]).tolist(),
-            )

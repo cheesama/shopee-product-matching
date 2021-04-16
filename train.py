@@ -40,7 +40,6 @@ if __name__ == "__main__":
         model=embedding_net,
         lr=args.lr,
         margin=args.margin,
-        csv_file=args.train_csv_file,
     )
 
     # Init DataLoader from Custom Dataset
@@ -75,5 +74,5 @@ if __name__ == "__main__":
         callbacks=[early_stopping],
     )
 
-    # Train the model ⚡
+    # Train the model
     trainer.fit(product_encoder, train_loader, valid_loader)
