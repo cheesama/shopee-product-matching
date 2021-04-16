@@ -1,4 +1,5 @@
 from pytorch_lightning.metrics.functional import f1, accuracy
+from pytorch_lightning.callbacks import EarlyStopping
 from torch.utils.data import DataLoader, random_split
 from sklearn.utils import shuffle
 
@@ -60,12 +61,15 @@ if __name__ == "__main__":
         valid_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count()
     )
 
+    early_stopping = EarlyStopping("val_loss")
+
     # Initialize a trainer
     trainer = pl.Trainer(
         gpus=torch.cuda.device_count(),
         progress_bar_refresh_rate=1,
         accelerator="ddp",
         max_epochs=args.epochs,
+        callbacks=[early_stopping],
     )
 
     # Train the model ⚡
