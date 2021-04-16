@@ -37,7 +37,10 @@ if __name__ == "__main__":
         backbone_net=args.backbone_net, feature_dim=args.feature_dim
     )
     product_encoder = ProductFeatureEncoder(
-        model=embedding_net, lr=args.lr, margin=args.margin
+        model=embedding_net,
+        lr=args.lr,
+        margin=args.margin,
+        csv_file=args.train_csv_file,
     )
 
     # Init DataLoader from Custom Dataset

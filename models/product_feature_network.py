@@ -1,4 +1,5 @@
 from torchvision.models import *
+from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 import torch
@@ -7,6 +8,8 @@ import torch.nn.functional as F
 
 import pytorch_lightning as pl
 
+import PIL
+import pandas as pd
 
 class ProductFeatureNet(nn.Module):
     def __init__(self, backbone_net: str, feature_dim=256):
@@ -26,7 +29,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, margin=0.5):
+    def __init__(self, model, lr=1e-3, margin=0.5, csv_file=None):
         super().__init__()
 
         self.save_hyperparameters()
@@ -34,6 +37,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.model = model
         self.lr = lr
         self.margin = margin
+        self.csv_file = csv_file
 
     def forward(self, images):
         features = self.model(images)
@@ -82,4 +86,20 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         self.log("val_loss", similarity_loss, prog_bar=True)
 
-        return {'posting_ids': posting_ids, 'features': features, 'val_loss': similarity_loss}
+        return {
+            "posting_ids": posting_ids,
+            "features": features,
+            "labels": labels,
+            "val_loss": similarity_loss,
+        }
+
+    def validation_epoch_end(self, outputs):
+        if self.csv_file is not None:
+            print (outputs)
+
+            valid_df = pd.read_csv(self.csv_file)
+
+            self.logger.experiment.add_embedding(
+                torch.stack([x["features"] for x in outputs]),
+                torch.stack([x["labels"] for x in outputs]).tolist(),
+            )
