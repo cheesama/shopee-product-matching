@@ -1,4 +1,5 @@
 from torchvision.models import *
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 import torch
 import torch.nn as nn
@@ -10,8 +11,7 @@ import pytorch_lightning as pl
 class ProductFeatureNet(nn.Module):
     def __init__(self, backbone_net: str, feature_dim=256):
         super(ProductFeatureNet, self).__init__()
-        self.save_hyperparameters()
-
+        
         self.backbone_net = eval(backbone_net)(pretrained=True)
         self.feature_layer = nn.Linear(
             self.backbone_net.fc.out_features, feature_dim, bias=False
@@ -28,6 +28,9 @@ class ProductFeatureNet(nn.Module):
 class ProductFeatureEncoder(pl.LightningModule):
     def __init__(self, model, lr=1e-3, margin=0.5):
         super().__init__()
+
+        self.save_hyperparameters()
+
         self.model = model
         self.lr = lr
         self.margin = margin
@@ -38,9 +41,12 @@ class ProductFeatureEncoder(pl.LightningModule):
         return features
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-
-        return optimizer
+        optim = torch.optim.Adam(self.parameters(), lr=self.lr)
+        return {
+            'optimizer': optim,
+            'lr_scheduler': ReduceLROnPlateau(optim, patience=1, threshold=1e-7),
+            'monitor': 'val_loss'
+        }
 
     def training_step(self, train_batch, batch_idx):
         images, labels = train_batch
@@ -54,7 +60,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         similarity_loss = (
             ((negative_pairs * cosine_similarities) / 2).clamp(min=0.0)
             - (((positive_pairs * cosine_similarities) / 2).clamp(max=0.0))
-        ).mean()
+        ).sum()
 
         self.log("train_loss", similarity_loss, prog_bar=True)
 
@@ -72,7 +78,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         similarity_loss = (
             ((negative_pairs * cosine_similarities) / 2).clamp(min=0.0)
             - (((positive_pairs * cosine_similarities) / 2).clamp(max=0.0))
-        ).mean() + self.margin
+        ).sum()
 
         self.log("val_loss", similarity_loss, prog_bar=True)
 
