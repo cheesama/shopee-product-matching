@@ -4,3 +4,5 @@ torch
 pytorch-lightning
 torchvision
 scikit-learn
+
+faiss-cpu

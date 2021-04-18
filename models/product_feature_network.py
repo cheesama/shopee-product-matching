@@ -37,7 +37,6 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.model = model
         self.lr = lr
         self.margin = margin
-        self.csv_file = csv_file
 
     def forward(self, images):
         features = self.model(images)
