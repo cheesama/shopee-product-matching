@@ -60,10 +60,10 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_pairs = (labels == labels.transpose(1, 0)).float()
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
-        similarity_loss = (
-            ((negative_pairs * cosine_similarities) / 2).clamp(min=0.0)
-            - (((positive_pairs * cosine_similarities) / 2).clamp(max=0.0))
-        ).sum()
+
+        negative_margin  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0) / 2
+        positive_margin =  (1 - (positive_pairs * cosine_similarities)) / 2
+        similarity_loss = negative_loss + positive_loss
 
         self.log("train_loss", similarity_loss, prog_bar=True)
 
