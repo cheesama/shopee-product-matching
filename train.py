@@ -78,3 +78,27 @@ if __name__ == "__main__":
     trainer.fit(product_encoder, train_loader, valid_loader)
 
     # embedding projection using trained model
+    valid_dataset = ProductPairDataset(
+		df=dataset_df,
+		root_dir=args['train_root_dir'],
+		train_mode=False,
+	)
+	valid_loader = DataLoader(
+		valid_dataset, batch_size=args['batch'] // 4, num_workers=multiprocessing.cpu_count(), shuffle=False
+	)
+
+	device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+	product_encoder.model = product_encoder.model.to(device)
+
+	embeddings = None
+
+	# store image feature embedding iterating over data
+	for posting_ids, images, labels in tqdm(valid_loader, desc='storing image features ...'):
+		images = images.to(device)
+		with torch.no_grad():
+			features = product_encoder.model(images)
+			
+			if embeddings is None:
+				embeddings = features.cpu()
+			else:
+				embeddings = torch.cat([embeddings, features.cpu()])
