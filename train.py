@@ -80,25 +80,40 @@ if __name__ == "__main__":
     # embedding projection using trained model
     valid_dataset = ProductPairDataset(
         df=dataset_df,
-        root_dir=args['train_root_dir'],
+        root_dir=args["train_root_dir"],
         train_mode=False,
     )
     valid_loader = DataLoader(
-        valid_dataset, batch_size=args['batch'] // 4, num_workers=multiprocessing.cpu_count(), shuffle=False
+        valid_dataset,
+        batch_size=args["batch"] // 4,
+        num_workers=multiprocessing.cpu_count(),
+        shuffle=False,
     )
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     product_encoder.model = product_encoder.model.to(device)
 
-    embeddings = None
+    images_tensor = None
+    embeddings_tensor = None
 
     # store image feature embedding iterating over data
-    for posting_ids, images, labels in tqdm(valid_loader, desc='storing image features ...'):
+    for posting_ids, images, labels in tqdm(
+        valid_loader, desc="storing image features ..."
+    ):
         images = images.to(device)
         with torch.no_grad():
             features = product_encoder.model(images)
-            
-            if embeddings is None:
-                embeddings = features.cpu()
+
+            if embeddings_tensor is None:
+                embeddings_tensor = features.cpu()
             else:
-                embeddings = torch.cat([embeddings, features.cpu()])
+                embeddings_tensor = torch.cat([embeddings_tensor, features.cpu()])
+
+            if images_tensor is None:
+                images_tensor = images.cpu()
+            else:
+                images_tensor = torch.cat([images_tensor, images.cpu()])
+
+    product_encoder.logger.experiment.add_embedding(
+        mat=embeddings_tensor, label_img=images_tensor
+    )
