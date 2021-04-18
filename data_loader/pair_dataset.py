@@ -54,6 +54,8 @@ class ProductPairDataset(Dataset):
         image = self.transform(image)
         label = torch.LongTensor([int(label)])
 
+        # add extra positive pairs for loss balancing
+
         return posting_id, image, label
 
 if __name__ == '__main__':

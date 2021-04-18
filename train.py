@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
-    parser.add_argument("--batch", default=32)
+    parser.add_argument("--batch", default=128)
     parser.add_argument("--margin", default=0.5)
 
     # dataset parameters
@@ -80,12 +80,12 @@ if __name__ == "__main__":
     # embedding projection using trained model
     valid_dataset = ProductPairDataset(
         df=dataset_df,
-        root_dir=args["train_root_dir"],
+        root_dir=args.train_root_dir,
         train_mode=False,
     )
     valid_loader = DataLoader(
         valid_dataset,
-        batch_size=args["batch"] // 4,
+        batch_size=args.batch // 4,
         num_workers=multiprocessing.cpu_count(),
         shuffle=False,
     )
