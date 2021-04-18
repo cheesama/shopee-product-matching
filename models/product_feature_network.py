@@ -65,6 +65,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_margin =  (1 - (positive_pairs * cosine_similarities)) / 2
         similarity_loss = negative_loss + positive_loss
 
+        self.log("train_negative_loss", negative_loss)
+        self.log("train_positive_loss", positive_loss)
         self.log("train_loss", similarity_loss, prog_bar=True)
 
         return similarity_loss
