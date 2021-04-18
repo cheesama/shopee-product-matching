@@ -76,3 +76,5 @@ if __name__ == "__main__":
 
     # Train the model
     trainer.fit(product_encoder, train_loader, valid_loader)
+
+    # embedding projection using trained model
