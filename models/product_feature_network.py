@@ -52,11 +52,13 @@ class ProductFeatureEncoder(pl.LightningModule):
         }
 
     def training_step(self, train_batch, batch_idx):
+        self.model.train()
+
         _, images, labels = train_batch
 
         features = self.model(images)
 
-        # multi-batch contrastive loss
+        # in-batch contrastive loss
         positive_pairs = (labels == labels.transpose(1, 0)).float()
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
@@ -72,20 +74,23 @@ class ProductFeatureEncoder(pl.LightningModule):
         return similarity_loss
 
     def validation_step(self, validation_batch, batch_idx):
+        self.model.eval()
+
         posting_ids, images, labels = validation_batch
 
         features = self.model(images)
 
-        # multi-batch contrastive loss
-        positive_pairs = (labels == labels.transpose(1, 0)).float()
-        negative_pairs = (labels != labels.transpose(1, 0)).float()
-        cosine_similarities = torch.mm(features, features.transpose(1, 0))
-        similarity_loss = (
-            ((negative_pairs * cosine_similarities) / 2).clamp(min=0.0)
-            - (((positive_pairs * cosine_similarities) / 2).clamp(max=0.0))
-        ).sum()
+        # in-batch contrastive loss
+        with torch.no_grad():
+            positive_pairs = (labels == labels.transpose(1, 0)).float()
+            negative_pairs = (labels != labels.transpose(1, 0)).float()
+            cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        self.log("val_loss", similarity_loss, prog_bar=True)
+            negative_loss  = ((negative_pairs * cosine_similarities - self.margin).clamp(min=0.0) / 2).mean()
+            positive_loss =  ((1 - (positive_pairs * cosine_similarities)) / 2).mean()
+            similarity_loss = negative_loss + positive_loss
+
+            self.log("val_loss", similarity_loss, prog_bar=True)
 
         return {
             "posting_ids": posting_ids,
