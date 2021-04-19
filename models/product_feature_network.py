@@ -31,14 +31,15 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, margin=0.5):
+    def __init__(self, model, lr=1e-3):
         super().__init__()
 
         self.save_hyperparameters()
 
         self.model = model
         self.lr = lr
-        self.margin = margin
+        
+
 
     def forward(self, images):
         features = self.model(images)

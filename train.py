@@ -29,7 +29,6 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--batch", default=16)
-    parser.add_argument("--margin", default=0.5)
 
     # dataset parameters
     parser.add_argument("--train_portion", default=0.9)
@@ -45,7 +44,6 @@ if __name__ == "__main__":
     product_encoder = ProductFeatureEncoder(
         model=embedding_net,
         lr=args.lr,
-        margin=args.margin,
     )
 
     # Init DataLoader from Custom Dataset
@@ -91,6 +89,7 @@ if __name__ == "__main__":
         accelerator="ddp",
         max_epochs=args.epochs,
         callbacks=[early_stopping],
+        replace_sampler_ddp=False
     )
 
     # Train the model
