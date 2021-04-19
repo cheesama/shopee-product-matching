@@ -17,6 +17,7 @@ import argparse
 import pandas as pd
 import multiprocessing
 import numpy as np
+import faiss
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     )
     valid_loader = DataLoader(
         valid_dataset,
-        batch_size=args.batch // 4,
+        batch_size=args.batch,
         num_workers=multiprocessing.cpu_count(),
         shuffle=False,
     )
@@ -135,3 +136,15 @@ if __name__ == "__main__":
     product_encoder.logger.experiment.add_embedding(
         mat=embeddings_tensor, label_img=images_tensor
     )
+
+	df = pd.read_csv(args.train_csv_file)
+
+	matches_column = []
+	for i in tqdm(range(len(df))):
+    	matches_column.append(' '.join(list(df[df['label_group']==df.iloc[i]['label_group']]['posting_id'])))
+	df['macthes'] = matches_column
+
+	index = faiss.IndexFlatIP(args.feature_dim)
+	index.add(embeddings_tensor.numpy())
+	distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
+
