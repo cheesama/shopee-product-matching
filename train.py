@@ -70,8 +70,6 @@ if __name__ == "__main__":
         train_dataset,
         batch_size=args.batch,
         num_workers=multiprocessing.cpu_count(),
-        #collate_fn=positive_pair_augment_collate_fn,
-        shuffle=True,
         sampler=sampler
     )
 
