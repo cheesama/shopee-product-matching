@@ -77,9 +77,9 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         if self.memory_batch_features is not None:
             # cross-batch contrastive loss
-            xbm_positive_pairs = (labels == labels.transpose(1, 0)).float()
-            xbm_negative_pairs = (labels != labels.transpose(1, 0)).float()
-            xbm_cosine_similarities = torch.mm(features, features.transpose(1, 0))
+            xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0)).float()
+            xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
+            xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
             xbm_negative_loss  = (xbm_negative_pairs * xbm_cosine_similarities).clamp(min=0.0).mean()
             xbm_positive_loss  = (1 - xbm_positive_pairs * xbm_cosine_similarities).mean()
