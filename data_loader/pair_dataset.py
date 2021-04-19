@@ -64,85 +64,24 @@ class ProductPairDataset(Dataset):
                     ]
                 )
 
-        self.resampling()
-
-    def resampling(self):
-        self.posting_ids = []
-        self.images = []
-        self.labels = []
-
-        random_indicies = list(range(len(self.products_frame)))
-        random.shuffle(random_indicies)
-
-        for index in tqdm(random_indicies, desc='sampling dataset ...'):
-            label = int(self.products_frame.iloc[index]["label_group"])
-
-            self.posting_ids.append(
-                torch.LongTensor(
-                    [
-                        int(
-                            self.products_frame.iloc[index]["posting_id"]
-                            .split("_")[1]
-                            .strip()
-                        )
-                    ]
-                )
-            )
-            self.images.append(
-                self.transform(
-                    PIL.Image.open(
-                        self.root_dir
-                        + os.sep
-                        + self.products_frame.iloc[index]["image"]
-                    )
-                )
-            )
-            self.labels.append(
-                torch.LongTensor([label])
-            )
-
-            #assume batch has at least one-positive pair
-            random_index = len(self.products_frame) + 10
-            index_candidates = list(self.products_frame[self.products_frame['label_group']==label].index)
-            random_index = random.choice(index_candidates)
-            if random_index > len(self.products_frame) - 1:
-                continue
-
-            self.posting_ids.append(
-                torch.LongTensor(
-                    [
-                        int(
-                            self.products_frame.iloc[random_index]["posting_id"]
-                            .split("_")[1]
-                            .strip()
-                        )
-                    ]
-                )
-            )
-            self.images.append(
-                self.transform(
-                    PIL.Image.open(
-                        self.root_dir
-                        + os.sep
-                        + self.products_frame.iloc[random_index]["image"]
-                    )
-                )
-            )
-            self.labels.append(
-                torch.LongTensor([label])
-            )
-
-
-
-
-
-
-
     def __len__(self):
         return len(self.products_frame)
 
     def __getitem__(self, index):
-        return self.posting_ids[index], self.images[index], self.labels[index]
+        label = int(self.products_frame.iloc[index]["label_group"])
+
+        image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"]))
+        label_tensor = torch.LongTensor([label])
+
+        #ensure at least one positive pair
+        pair_index = random.choice(list(self.products_frame[self.products_frame['label_group']==label].index))
+        if pair_index > len(self.products_frame) - 1:
+            pair_index = index
+
+        aug_image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[pair_index]["image"]))
+        aug_label_tensor = torch.LongTensor([label])
+
+        return image_tensor, label_tensor, aug_image_tensor, aug_label_tensor
 
 
 if __name__ == "__main__":

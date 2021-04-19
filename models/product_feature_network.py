@@ -56,7 +56,9 @@ class ProductFeatureEncoder(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         self.model.train()
 
-        _, images, labels = train_batch
+        images, labels, aug_images, aug_labels = train_batch
+        images = torch.stack([images, aug_images])
+        labels = torch.stack([labels, aug_labels])
 
         features = self.model(images)
 
@@ -78,7 +80,7 @@ class ProductFeatureEncoder(pl.LightningModule):
     def validation_step(self, validation_batch, batch_idx):
         self.model.eval()
 
-        posting_ids, images, labels = validation_batch
+        images, labels, _, _ = validation_batch
 
         features = self.model(images)
 
