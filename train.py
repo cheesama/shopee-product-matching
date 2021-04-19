@@ -3,6 +3,8 @@ from pytorch_lightning.callbacks import EarlyStopping
 from torch.utils.data import DataLoader, random_split
 from sklearn.utils import shuffle
 
+from tqdm import tqdm
+
 from models.product_feature_network import ProductFeatureNet, ProductFeatureEncoder
 from data_loader.pair_dataset import (
     ProductPairDataset,

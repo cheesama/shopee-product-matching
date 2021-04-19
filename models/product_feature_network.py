@@ -2,6 +2,8 @@ from torchvision.models import *
 from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+from tqdm import tqdm
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -63,8 +65,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        negative_loss  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0).sum()
-        positive_loss  = (1 - positive_pairs * cosine_similarities).sum()
+        negative_loss  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0).mean()
+        positive_loss  = (1 - positive_pairs * cosine_similarities).clamp(min=0.0).mean()
         similarity_loss = negative_loss + positive_loss
 
         self.log("train/negative_loss", negative_loss, prog_bar=True)
