@@ -62,12 +62,15 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         features = self.model(images)
 
+        print ('labels')
+        print (labels)
+        print ('aug_labels')
+        print (aug_labels)
+
         # in-batch contrastive loss
         positive_pairs = (labels == labels.transpose(1, 0)).float()
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
-        print ('labels')
-        print (labels)
         print ('positive_pairs')
         print (positive_pairs)
 

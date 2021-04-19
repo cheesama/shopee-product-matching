@@ -27,7 +27,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
-    parser.add_argument("--batch", default=64)
+    parser.add_argument("--batch", default=16)
     parser.add_argument("--margin", default=0.5)
 
     # dataset parameters
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     embeddings_tensor = None
 
     # store image feature embedding iterating over data
-    for posting_ids, images, labels in tqdm(
+    for images, labels, _, _ in tqdm(
         valid_loader, desc="storing image features ..."
     ):
         images = images.to(device)
