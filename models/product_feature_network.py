@@ -57,8 +57,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.model.train()
 
         images, labels, aug_images, aug_labels = train_batch
-        images = torch.stack([images, aug_images])
-        labels = torch.stack([labels, aug_labels])
+        images = torch.cat([images, aug_images])
+        labels = torch.cat([labels, aug_labels])
 
         features = self.model(images)
 
