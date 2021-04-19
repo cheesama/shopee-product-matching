@@ -97,7 +97,6 @@ class ProductFeatureEncoder(pl.LightningModule):
             self.log("val_loss", similarity_loss, prog_bar=True)
 
         return {
-            "posting_ids": posting_ids,
             "features": features,
             "labels": labels,
             "val_loss": similarity_loss,
