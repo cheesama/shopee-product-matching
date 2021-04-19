@@ -31,14 +31,17 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3):
+    def __init__(self, model, lr=1e-3, memory_batch_max_num=32*2):
         super().__init__()
 
         self.save_hyperparameters()
 
         self.model = model
         self.lr = lr
-        
+ 
+        self.memory_batch_max_num = 
+        self.memory_batch_features = []
+        self.memory_batch_labels = []
 
 
     def forward(self, images):
