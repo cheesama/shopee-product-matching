@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
-    parser.add_argument("--batch", default=16)
+    parser.add_argument("--batch", default=32)
 
     # dataset parameters
     parser.add_argument("--train_portion", default=0.9)
@@ -102,7 +102,6 @@ if __name__ == "__main__":
         df=dataset_df,
         root_dir=args.train_root_dir,
         train_mode=False,
-        shuffle=True
     )
     valid_loader = DataLoader(
         valid_dataset,
