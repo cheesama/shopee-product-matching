@@ -57,6 +57,7 @@ class ProductPairDataset(Dataset):
         return len(self.products_frame)
 
     def __getitem__(self, index):
+        '''
         if self.train_mode:
             posting_ids = [torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])]
 
@@ -74,17 +75,17 @@ class ProductPairDataset(Dataset):
 
             return posting_ids, images, labels
 
-
         else:
-            posting_id = torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])
+        '''
+        posting_id = torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])
 
-            image = PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
-            image = self.transform(image)
+        image = PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
+        image = self.transform(image)
 
-            label = self.products_frame.iloc[index]["label_group"]
-            label = torch.LongTensor([int(label)])
+        label = self.products_frame.iloc[index]["label_group"]
+        label = torch.LongTensor([int(label)])
 
-            return posting_id, image, label
+        return posting_id, image, label
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
