@@ -56,24 +56,13 @@ class ProductFeatureEncoder(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         self.model.train()
 
-        images, labels, aug_images, aug_labels = train_batch
-        images = torch.cat([images, aug_images])
-        labels = torch.cat([labels, aug_labels])
-
+        images, labels = train_batch
         features = self.model(images)
-
-        print ('labels')
-        print (labels)
-        print ('aug_labels')
-        print (aug_labels)
 
         # in-batch contrastive loss
         positive_pairs = (labels == labels.transpose(1, 0)).float()
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
-        print ('positive_pairs')
-        print (positive_pairs)
-
 
         negative_loss  = (negative_pairs * cosine_similarities).clamp(min=0.0).mean()
         positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
@@ -88,7 +77,7 @@ class ProductFeatureEncoder(pl.LightningModule):
     def validation_step(self, validation_batch, batch_idx):
         self.model.eval()
 
-        images, labels, _, _ = validation_batch
+        images, labels = validation_batch
 
         features = self.model(images)
 

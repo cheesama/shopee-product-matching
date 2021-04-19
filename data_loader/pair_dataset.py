@@ -11,18 +11,6 @@ import PIL
 import argparse
 import random
 
-
-def positive_pair_augment_collate_fn(samples, max_sampling=128):
-    """
-    samples : list of (posting_ids, images, labels)
-    """
-    return (
-        torch.stack(posting_ids[:max_sampling]),
-        torch.stack(images[:max_sampling]),
-        torch.stack(labels[:max_sampling]),
-    )
-
-
 class ProductPairDataset(Dataset):
     def __init__(self, df, root_dir, train_mode=True, transform=None):
         """
@@ -35,7 +23,6 @@ class ProductPairDataset(Dataset):
         self.root_dir = root_dir
         self.train_mode = train_mode
 
-        self.posting_ids = []
         self.images = []
         self.labels = []
 
@@ -73,15 +60,7 @@ class ProductPairDataset(Dataset):
         image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"]))
         label_tensor = torch.LongTensor([label])
 
-        #ensure at least one positive pair
-        pair_index = random.choice(list(self.products_frame[self.products_frame['label_group']==label].index))
-        if pair_index > len(self.products_frame) - 1:
-            pair_index = index
-
-        aug_image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[pair_index]["image"]))
-        aug_label_tensor = torch.LongTensor([label])
-
-        return image_tensor, label_tensor, aug_image_tensor, aug_label_tensor
+        return image_tensor, label_tensor
 
 
 if __name__ == "__main__":
