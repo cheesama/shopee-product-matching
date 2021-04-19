@@ -8,6 +8,14 @@ import pandas as pd
 import PIL
 import argparse
 
+def positive_pair_augment_collate_fn(samples, max_sampling=128):
+    '''
+    samples : list of (posting_ids, images, labels)
+    '''
+
+    return torch.stack(posting_ids[:max_sampling]), torch.stack(images[:max_sampling]), torch.stack(labels[:max_sampling])
+
+
 class ProductPairDataset(Dataset):
     def __init__(self, df, root_dir, train_mode=True, transform=None):
         """
@@ -18,11 +26,12 @@ class ProductPairDataset(Dataset):
         """
         self.products_frame = df
         self.root_dir = root_dir
+        self.train_mode = train_mode
 
         if transform is not None:
             self.transform = transform
         else:
-            if train_mode: # set default image tranform
+            if self.train_mode: # set default image tranform
                 self.transform = transforms.Compose(
                     [
                         transforms.RandomResizedCrop([224,224]),
@@ -48,15 +57,34 @@ class ProductPairDataset(Dataset):
         return len(self.products_frame)
 
     def __getitem__(self, index):
-        posting_id = torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])
-        image = PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
-        label = self.products_frame.iloc[index]["label_group"]
-        image = self.transform(image)
-        label = torch.LongTensor([int(label)])
+        if self.train_mode:
+            posting_ids = [torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])]
 
-        # add extra positive pairs for loss balancing
+            image = PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
+            images = [self.transform(image)]
 
-        return posting_id, image, label
+            label = self.products_frame.iloc[index]["label_group"]
+            labels = [torch.LongTensor([int(label)])]
+
+            # add extra positive pairs for loss balancing
+            for row in self.products_frame[self.products_frame['label_group'] == label].iterrows():
+                posting_ids.append(torch.LongTensor([int(row[1]['posting_id'].split('_')[1].strip())]))
+                images.append(self.transform(PIL.Image.open(self.root_dir + os.sep + row[1]["image"])))
+                labels.append(torch.LongTensor([int(row[1]['label_group'])]))
+
+            return posting_ids, images, labels
+
+
+        else:
+            posting_id = torch.LongTensor([int(self.products_frame.iloc[index]['posting_id'].split('_')[1].strip())])
+
+            image = PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"])
+            image = self.transform(image)
+
+            label = self.products_frame.iloc[index]["label_group"]
+            label = torch.LongTensor([int(label)])
+
+            return posting_id, image, label
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

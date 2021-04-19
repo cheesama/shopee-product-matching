@@ -63,12 +63,12 @@ class ProductFeatureEncoder(pl.LightningModule):
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        negative_loss  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0).mean()
-        positive_loss  = -(positive_pairs * cosine_similarities).clamp(max=0.0).mean()
+        negative_loss  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0).sum()
+        positive_loss  = (1 - positive_pairs * cosine_similarities).sum()
         similarity_loss = negative_loss + positive_loss
 
-        self.log("train/negative_loss", negative_loss)
-        self.log("train/positive_loss", positive_loss)
+        self.log("train/negative_loss", negative_loss, prog_bar=True)
+        self.log("train/positive_loss", positive_loss, prob_bar=True)
         self.log("train/loss", similarity_loss, prog_bar=True)
 
         return similarity_loss
@@ -86,8 +86,8 @@ class ProductFeatureEncoder(pl.LightningModule):
             negative_pairs = (labels != labels.transpose(1, 0)).float()
             cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-            negative_loss  = ((negative_pairs * cosine_similarities - self.margin).clamp(min=0.0) / 2).mean()
-            positive_loss =  ((1 - (positive_pairs * cosine_similarities)) / 2).mean()
+            negative_loss  = (negative_pairs * cosine_similarities - self.margin).clamp(min=0.0).mean()
+            positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
             similarity_loss = negative_loss + positive_loss
 
             self.log("val_loss", similarity_loss, prog_bar=True)

@@ -4,7 +4,10 @@ from torch.utils.data import DataLoader, random_split
 from sklearn.utils import shuffle
 
 from models.product_feature_network import ProductFeatureNet, ProductFeatureEncoder
-from data_loader.pair_dataset import ProductPairDataset
+from data_loader.pair_dataset import (
+    ProductPairDataset,
+    positive_pair_augment_collate_fn,
+)
 
 import pytorch_lightning as pl
 import torch
@@ -22,7 +25,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
-    parser.add_argument("--batch", default=128)
+    parser.add_argument("--batch", default=64)
     parser.add_argument("--margin", default=0.5)
 
     # dataset parameters
@@ -49,9 +52,14 @@ if __name__ == "__main__":
     train_dataset = ProductPairDataset(
         df=dataset_df[: int(len(dataset_df) * args.train_portion)],
         root_dir=args.train_root_dir,
+        train_mode=True,
     )
     train_loader = DataLoader(
-        train_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count()
+        train_dataset,
+        batch_size=args.batch,
+        num_workers=multiprocessing.cpu_count(),
+        #collate_fn=positive_pair_augment_collate_fn,
+        shuffle=True
     )
 
     valid_dataset = ProductPairDataset(
