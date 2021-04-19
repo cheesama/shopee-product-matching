@@ -137,14 +137,14 @@ if __name__ == "__main__":
         mat=embeddings_tensor, label_img=images_tensor
     )
 
-	df = pd.read_csv(args.train_csv_file)
+    df = pd.read_csv(args.train_csv_file)
 
-	matches_column = []
-	for i in tqdm(range(len(df))):
-    	matches_column.append(' '.join(list(df[df['label_group']==df.iloc[i]['label_group']]['posting_id'])))
-	df['macthes'] = matches_column
+    matches_column = []
+    for i in tqdm(range(len(df))):
+        matches_column.append(' '.join(list(df[df['label_group']==df.iloc[i]['label_group']]['posting_id'])))
+    df['macthes'] = matches_column
 
-	index = faiss.IndexFlatIP(args.feature_dim)
-	index.add(embeddings_tensor.numpy())
-	distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
+    index = faiss.IndexFlatIP(args.feature_dim)
+    index.add(embeddings_tensor.numpy())
+    distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
 
