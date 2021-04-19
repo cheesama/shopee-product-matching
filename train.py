@@ -57,7 +57,7 @@ if __name__ == "__main__":
     class_sample_count_dict = {}
     for sample_weight in class_sample_count:
         class_sample_count_dict[sample_weight[1]] = 1 / float(sample_weight[0])
-    samples_weight = [class_sample_count_dict[label] for label in dataset_df['label_group']]
+    samples_weight = np.array([class_sample_count_dict[label] for label in dataset_df['label_group']])
     samples_weight = torch.from_numpy(samples_weight)
     sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
 
