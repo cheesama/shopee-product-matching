@@ -66,6 +66,11 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_pairs = (labels == labels.transpose(1, 0)).float()
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
+        print ('labels')
+        print (labels)
+        print ('positive_pairs')
+        print (positive_pairs)
+
 
         negative_loss  = (negative_pairs * cosine_similarities).clamp(min=0.0).mean()
         positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
