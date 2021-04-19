@@ -31,7 +31,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, memory_batch_max_num=32*2):
+    def __init__(self, model, lr=1e-3, memory_batch_max_num=128):
         super().__init__()
 
         self.save_hyperparameters()
@@ -40,8 +40,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.lr = lr
  
         self.memory_batch_max_num = memory_batch_max_num
-        self.memory_batch_features = []
-        self.memory_batch_labels = []
+        self.memory_batch_features = None
+        self.memory_batch_labels = None
 
     def forward(self, images):
         features = self.model(images)
@@ -71,9 +71,34 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
         similarity_loss = negative_loss + positive_loss
 
-        self.log("train/positive_pair_num", positive_pairs.sum() / 2 - images.size(0), prog_bar=True)
+        self.log("train/positive_pair_num", (positive_pairs.sum() - images.size(0)) / 2, prog_bar=True)
         self.log("train/positive_loss", positive_loss, prog_bar=True)
         self.log("train/loss", similarity_loss, prog_bar=True)
+
+        if self.memory_batch_features is not None:
+            # cross-batch contrastive loss
+            xbm_positive_pairs = (labels == labels.transpose(1, 0)).float()
+            xbm_negative_pairs = (labels != labels.transpose(1, 0)).float()
+            xbm_cosine_similarities = torch.mm(features, features.transpose(1, 0))
+
+            xbm_negative_loss  = (xbm_negative_pairs * xbm_cosine_similarities).clamp(min=0.0).mean()
+            xbm_positive_loss  = (1 - xbm_positive_pairs * xbm_cosine_similarities).mean()
+            xbm_loss = xbm_negative_loss + xbm_positive_loss
+
+            self.log("train/xbm_loss", xbm_loss, prog_bar=True)
+
+            #update memory batch
+            self.memory_batch_features = torch.cat([self.memory_batch_features, features.detach()])
+            self.memory_batch_labels = torch.cat([self.memory_batch_labels, labels.detach()])
+
+            self.memory_batch_features = self.memory_batch_features[-self.memory_batch_max_num:]
+            self.memory_batch_labels = self.memory_batch_labels[-self.memory_batch_max_num:]
+
+            return similarity_loss + xbm_loss
+
+        else:
+            self.memory_batch_features = features.detach()
+            self.memory_batch_labels = labels.detach()
 
         return similarity_loss
 
