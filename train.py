@@ -9,7 +9,6 @@ from tqdm import tqdm
 from models.product_feature_network import ProductFeatureNet, ProductFeatureEncoder
 from data_loader.pair_dataset import (
     ProductPairDataset,
-    positive_pair_augment_collate_fn,
 )
 
 import pytorch_lightning as pl
