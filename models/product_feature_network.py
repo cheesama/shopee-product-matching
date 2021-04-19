@@ -39,10 +39,9 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.model = model
         self.lr = lr
  
-        self.memory_batch_max_num = 
+        self.memory_batch_max_num = memory_batch_max_num
         self.memory_batch_features = []
         self.memory_batch_labels = []
-
 
     def forward(self, images):
         features = self.model(images)
