@@ -71,7 +71,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
         similarity_loss = negative_loss + positive_loss
 
-        self.log("train/positive_pair_num", positive_pair.sum() / 2, prog_bar=True)
+        self.log("train/positive_pair_num", positive_pairs.sum() / 2, prog_bar=True)
         self.log("train/positive_loss", positive_loss, prog_bar=True)
         self.log("train/loss", similarity_loss, prog_bar=True)
 
