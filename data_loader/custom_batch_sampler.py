@@ -1,4 +1,4 @@
-from torch.utils.data.sampler import BatchSamplera
+from torch.utils.data.sampler import BatchSampler
 
 import random
 
