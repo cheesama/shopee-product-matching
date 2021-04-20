@@ -21,13 +21,13 @@ class PositivePairAugBatchSampler(BatchSampler):
             batch_indices = []
 
             selected_labels = random.choices(
-                self.label_index_dict.keys(), k=self.num_labels_per_batch
+                list(self.label_index_dict.keys()), k=self.num_labels_per_batch
             )
 
             for label in selected_labels:
                 batch_indices.extend(
                     random.choices(
-                        self.label_index_dict[key], k=self.min_positive_instances
+                        self.label_index_dict[label], k=self.min_positive_instances
                     )
                 )
 
