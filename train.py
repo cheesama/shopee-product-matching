@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
-    parser.add_argument("--batch", default=32)
+    parser.add_argument("--batch", default=128)
 
     # dataset parameters
     parser.add_argument("--train_portion", default=0.9)
@@ -50,7 +50,6 @@ if __name__ == "__main__":
     dataset_df = pd.read_csv(args.train_csv_file)
     dataset_df = shuffle(dataset_df)
 
-    # Init sampler for considering data imbalancing
     train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
     train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(

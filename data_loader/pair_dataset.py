@@ -63,12 +63,3 @@ class ProductPairDataset(Dataset):
         label_tensor = torch.LongTensor([label])
 
         return image_tensor, label_tensor
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--csv_file")
-    parser.add_argument("--root_dir")
-    args = parser.parse_args()
-
-    dataset = ProductPairDataset(args.csv_file, args.root_dir)
