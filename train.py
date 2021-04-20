@@ -73,7 +73,7 @@ if __name__ == "__main__":
         batch_size=args.batch,
         num_workers=multiprocessing.cpu_count(),
         #sampler=sampler
-        batch_sampler = batch_sampler
+        batch_sampler = train_batch_sampler
     )
 
     valid_dataset = ProductPairDataset(
