@@ -31,7 +31,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, memory_batch_max_num=1024, pos_margin=1.0, neg_margin=0.5):
+    def __init__(self, model, lr=1e-3, memory_batch_max_num=1024):
         super().__init__()
 
         self.save_hyperparameters()
@@ -42,9 +42,6 @@ class ProductFeatureEncoder(pl.LightningModule):
         self.memory_batch_max_num = memory_batch_max_num
         self.memory_batch_features = None
         self.memory_batch_labels = None
-
-        self.pos_margin = pos_margin
-        self.neg_margin = neg_margin
 
     def forward(self, images):
         features = self.model(images)
@@ -70,8 +67,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        negative_loss  = F.relu(negative_pairs * cosine_similarities ).mean()
-        positive_loss  = F.relu(-positive_pairs * cosine_similarities).mean()
+        negative_loss  = F.relu(    negative_pairs * cosine_similarities).mean()
+        positive_loss  = F.relu(1 - positive_pairs * cosine_similarities).mean()
         similarity_loss = negative_loss + positive_loss
 
         self.log("train/pos_pair_num", (positive_pairs.sum() - images.size(0)) / 2, prog_bar=True)
@@ -84,8 +81,8 @@ class ProductFeatureEncoder(pl.LightningModule):
             xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
-            xbm_negative_loss  = F.relu(xbm_negative_pairs * xbm_cosine_similarities ).mean()
-            xbm_positive_loss  = F.relu(-xbm_positive_pairs * xbm_cosine_similarities).mean()
+            xbm_negative_loss  = F.relu(    xbm_negative_pairs * xbm_cosine_similarities).mean()
+            xbm_positive_loss  = F.relu(1 - xbm_positive_pairs * xbm_cosine_similarities).mean()
             xbm_loss = xbm_negative_loss + xbm_positive_loss
 
             self.log("train/xbm_pos_pair_num", xbm_positive_pairs.sum() / 2, prog_bar=True)
