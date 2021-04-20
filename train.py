@@ -1,5 +1,6 @@
 from pytorch_lightning.metrics.functional import f1, accuracy
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
+from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from torch.utils.data import DataLoader, random_split
 from torch.utils.data.sampler import WeightedRandomSampler
 from sklearn.utils import shuffle
@@ -85,6 +86,7 @@ if __name__ == "__main__":
 
     early_stopping = EarlyStopping("val_loss")
     lr_monitor = LearningRateMonitor(logging_interval='step')
+    checkpoint_callback = ModelCheckpoint(monitor='val_loss', mode='min')
 
     # Initialize a trainer
     trainer = pl.Trainer(
@@ -92,7 +94,7 @@ if __name__ == "__main__":
         progress_bar_refresh_rate=1,
         accelerator="ddp",
         max_epochs=args.epochs,
-        callbacks=[early_stopping, lr_monitor],
+        callbacks=[early_stopping, lr_monitor, checkpoint_callback],
         replace_sampler_ddp=False
     )
 
@@ -124,15 +126,18 @@ if __name__ == "__main__":
     product_encoder.logger.experiment.add_embedding(
         mat=embeddings_tensor, label_img=images_tensor
     )
+    print ('embedding projection was saved !!')
 
     df = pd.read_csv(args.train_csv_file)
 
     matches_column = []
-    for i in tqdm(range(len(df))):
+    for i in tqdm(range(len(df)), desc='matching labels to each posting ...'):
         matches_column.append(' '.join(list(df[df['label_group']==df.iloc[i]['label_group']]['posting_id'])))
     df['macthes'] = matches_column
 
     index = faiss.IndexFlatIP(args.feature_dim)
     index.add(embeddings_tensor.numpy())
     distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
+
+    print (distances)
 

@@ -104,6 +104,11 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         return similarity_loss
 
+    def training_epoch_end(self, outputs):
+        if self.current_epoch == 1:
+            sampleInput = torch.rand(1,3,224,224)
+            self.logger.experiment.add_graph(ProductFeatureEncoder(self.args), sampleInput)
+
     def validation_step(self, validation_batch, batch_idx):
         self.model.eval()
 
