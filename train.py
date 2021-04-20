@@ -70,8 +70,8 @@ if __name__ == "__main__":
     )
     train_loader = DataLoader(
         train_dataset,
-        batch_size=args.batch,
         num_workers=multiprocessing.cpu_count(),
+        #batch_size=args.batch,
         #sampler=sampler
         batch_sampler = train_batch_sampler
     )
