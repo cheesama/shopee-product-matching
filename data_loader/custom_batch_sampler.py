@@ -12,10 +12,14 @@ class PositivePairAugBatchSampler(BatchSampler):
         self.label_index_dict = {}  # key: batch, value: [batch_indices]
         for label in dataset_df["label_group"]:
             self.label_index_dict[label] = [index for index in list(dataset_df[dataset_df["label_group"] == label].index) if index < len(dataset_df)]
+
+        delete_label_list = []
         for k, v in self.label_index_dict.items():
             if len(v) == 0:
-                del self.label_index_dict[k]
-
+                delete_label_list.append(k)
+        for label in delete_label_list:
+            del self.label_index_dict[label]
+        
     def __len__(self):
         return self.max_iter
 
