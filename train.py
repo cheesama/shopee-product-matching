@@ -100,19 +100,6 @@ if __name__ == "__main__":
     # Train the model
     trainer.fit(product_encoder, train_loader, valid_loader)
 
-    # embedding projection using trained model
-    valid_dataset = ProductPairDataset(
-        df=dataset_df,
-        root_dir=args.train_root_dir,
-        train_mode=False,
-    )
-    valid_loader = DataLoader(
-        valid_dataset,
-        batch_size=args.batch,
-        num_workers=multiprocessing.cpu_count(),
-        shuffle=False,
-    )
-
     # store image feature embedding iterating over data
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     product_encoder.model = product_encoder.model.to(device)
