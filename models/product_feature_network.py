@@ -106,7 +106,7 @@ class ProductFeatureEncoder(pl.LightningModule):
 
     def training_epoch_end(self, outputs):
         if self.current_epoch == 1:
-            sampleInput = torch.rand(1,3,224,224)
+            sampleInput = torch.rand(1,3,224,224).type_as(outputs)
             self.logger.experiment.add_graph(ProductFeatureEncoder(model=self.model), sampleInput)
 
     def validation_step(self, validation_batch, batch_idx):
