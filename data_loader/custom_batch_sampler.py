@@ -21,7 +21,7 @@ class PositivePairAugBatchSampler(BatchSampler):
             batch_indices = []
 
             selected_labels = random.choices(
-                self.label_index_dict.keys(), self.num_labels_per_batch
+                self.label_index_dict.keys(), k=self.num_labels_per_batch
             )
 
             for label in selected_labels:
