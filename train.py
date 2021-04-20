@@ -7,9 +7,8 @@ from sklearn.utils import shuffle
 from tqdm import tqdm
 
 from models.product_feature_network import ProductFeatureNet, ProductFeatureEncoder
-from data_loader.pair_dataset import (
-    ProductPairDataset,
-)
+from data_loader.pair_dataset import ProductPairDataset
+from data_loader.custom_batch_sampler import PositivePairAugBatshSampler
 
 import pytorch_lightning as pl
 import torch
@@ -54,6 +53,7 @@ if __name__ == "__main__":
     # Init sampler for considering data imbalancing
     train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
 
+    '''
     class_sample_count = np.array([(len(np.where(train_df['label_group']==t)[0]), t) for t in np.unique(train_df['label_group'])])
     class_sample_count_dict = {}
     for sample_weight in class_sample_count:
@@ -61,7 +61,8 @@ if __name__ == "__main__":
     samples_weight = np.array([class_sample_count_dict[label] for label in train_df['label_group']])
     samples_weight = torch.from_numpy(samples_weight)
     sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
-
+    '''
+    train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(
         df=train_df,
         root_dir=args.train_root_dir,
@@ -71,7 +72,8 @@ if __name__ == "__main__":
         train_dataset,
         batch_size=args.batch,
         num_workers=multiprocessing.cpu_count(),
-        sampler=sampler
+        #sampler=sampler
+        batch_sampler = batch_sampler
     )
 
     valid_dataset = ProductPairDataset(

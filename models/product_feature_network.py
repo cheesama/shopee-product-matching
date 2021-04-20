@@ -72,7 +72,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         similarity_loss = negative_loss + positive_loss
 
         self.log("train/pos_pair_num", (positive_pairs.sum() - images.size(0)) / 2, prog_bar=True)
-        self.log("train/positive_loss", positive_loss, prog_bar=True)
+        self.log("train/pos_loss", positive_loss, prog_bar=True)
         self.log("train/loss", similarity_loss, prog_bar=True)
 
         if self.memory_batch_features is not None:
