@@ -52,16 +52,6 @@ if __name__ == "__main__":
 
     # Init sampler for considering data imbalancing
     train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
-
-    '''
-    class_sample_count = np.array([(len(np.where(train_df['label_group']==t)[0]), t) for t in np.unique(train_df['label_group'])])
-    class_sample_count_dict = {}
-    for sample_weight in class_sample_count:
-        class_sample_count_dict[sample_weight[1]] = 1 / float(sample_weight[0])
-    samples_weight = np.array([class_sample_count_dict[label] for label in train_df['label_group']])
-    samples_weight = torch.from_numpy(samples_weight)
-    sampler = WeightedRandomSampler(samples_weight.type('torch.DoubleTensor'), len(samples_weight))
-    '''
     train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(
         df=train_df,
@@ -72,17 +62,26 @@ if __name__ == "__main__":
         train_dataset,
         num_workers=multiprocessing.cpu_count(),
         #batch_size=args.batch,
-        #sampler=sampler
         batch_sampler = train_batch_sampler
     )
 
+    valid_df = dataset_df[len(train_df):]
+    valid_batch_sampler = PositivePairAugBatchSampler(valid_df)
     valid_dataset = ProductPairDataset(
-        df=dataset_df[len(train_df):],
+        df=valid_df,
         root_dir=args.train_root_dir,
         train_mode=False,
     )
     valid_loader = DataLoader(
-        valid_dataset, batch_size=args.batch, num_workers=multiprocessing.cpu_count()
+        valid_dataset, 
+        num_workers=multiprocessing.cpu_count(),
+        batch_sampler = valid_batch_sampler
+    )
+
+    test_loader = DataLoader(
+        valid_dataset, 
+        num_workers=multiprocessing.cpu_count(),
+        batch_size=args.batch
     )
 
     early_stopping = EarlyStopping("val_loss")
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     images_tensor = None
     embeddings_tensor = None
 
-    for images, labels in tqdm(valid_loader, desc="storing image features ..."):
+    for images, labels in tqdm(test_loader, desc="storing image features ..."):
         images = images.to(device)
         with torch.no_grad():
             features = product_encoder.model(images)

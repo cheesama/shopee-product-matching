@@ -31,7 +31,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, memory_batch_max_num=256):
+    def __init__(self, model, lr=1e-3, memory_batch_max_num=1024):
         super().__init__()
 
         self.save_hyperparameters()
@@ -67,8 +67,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         negative_pairs = (labels != labels.transpose(1, 0)).float()
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        negative_loss  = (negative_pairs * cosine_similarities).clamp(min=0.0).sum()
-        positive_loss  = (1 - positive_pairs * cosine_similarities).sum()
+        negative_loss  = (negative_pairs * cosine_similarities).clamp(min=0.0).mean()
+        positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
         similarity_loss = negative_loss + positive_loss
 
         self.log("train/pos_pair_num", (positive_pairs.sum() - images.size(0)) / 2, prog_bar=True)
@@ -81,8 +81,8 @@ class ProductFeatureEncoder(pl.LightningModule):
             xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
-            xbm_negative_loss  = (xbm_negative_pairs * xbm_cosine_similarities).clamp(min=0.0).sum()
-            xbm_positive_loss  = (1 - xbm_positive_pairs * xbm_cosine_similarities).sum()
+            xbm_negative_loss  = (xbm_negative_pairs * xbm_cosine_similarities).clamp(min=0.0).mean()
+            xbm_positive_loss  = (1 - xbm_positive_pairs * xbm_cosine_similarities).mean()
             xbm_loss = xbm_negative_loss + xbm_positive_loss
 
             self.log("train/xbm_pos_pair_num", xbm_positive_pairs.sum() / 2, prog_bar=True)
