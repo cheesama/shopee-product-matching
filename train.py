@@ -1,5 +1,5 @@
 from pytorch_lightning.metrics.functional import f1, accuracy
-from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor
 from torch.utils.data import DataLoader, random_split
 from torch.utils.data.sampler import WeightedRandomSampler
 from sklearn.utils import shuffle
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     )
 
     early_stopping = EarlyStopping("val_loss")
+    lr_monitor = LearningRateMonitor(logging_interval='step')
 
     # Initialize a trainer
     trainer = pl.Trainer(
@@ -91,7 +92,7 @@ if __name__ == "__main__":
         progress_bar_refresh_rate=1,
         accelerator="ddp",
         max_epochs=args.epochs,
-        callbacks=[early_stopping],
+        callbacks=[early_stopping, lr_monitor],
         replace_sampler_ddp=False
     )
 
