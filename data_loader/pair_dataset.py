@@ -56,7 +56,7 @@ class ProductPairDataset(Dataset):
         return len(self.products_frame)
 
     def __getitem__(self, index):
-        print (f'data len:{len(self.products_frame)}\tindex:{index}')
+        #print (f'data len:{len(self.products_frame)}\tindex:{index}')
         label = int(self.products_frame.iloc[index]["label_group"])
 
         image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"]))
