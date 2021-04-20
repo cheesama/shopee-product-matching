@@ -31,7 +31,7 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, memory_batch_max_num=1024, pos_margin=0.0, neg_margin=1.0):
+    def __init__(self, model, lr=1e-3, memory_batch_max_num=1024, pos_margin=1.0, neg_margin=0.5):
         super().__init__()
 
         self.save_hyperparameters()
