@@ -5,7 +5,7 @@ import random
 
 class PositivePairAugBatchSampler(BatchSampler):
     def __init__(self, dataset_df, min_positive_instances=8, num_labels_per_batch=16):
-        self.max_iters = len(dataset_df)
+        self.max_iter = len(dataset_df)
         self.min_positive_instances = min_positive_instances
         self.num_labels_per_batch = num_labels_per_batch
 
