@@ -14,7 +14,7 @@ import PIL
 import pandas as pd
 
 class ProductFeatureNet(nn.Module):
-    def __init__(self, backbone_net: str, feature_dim=256):
+    def __init__(self, backbone_net: str, feature_dim=512):
         super(ProductFeatureNet, self).__init__()
 
         self.backbone_net = eval(backbone_net)(pretrained=True)

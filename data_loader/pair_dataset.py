@@ -32,6 +32,7 @@ class ProductPairDataset(Dataset):
             if self.train_mode:  # set default image tranform
                 self.transform = transforms.Compose(
                     [
+                        transforms.Resize([256, 256]),
                         transforms.RandomResizedCrop([224, 224]),
                         transforms.RandomHorizontalFlip(),
                         transforms.ToTensor(),

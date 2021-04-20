@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # model parameters
     parser.add_argument("--backbone_net", default="resnet18")
-    parser.add_argument("--feature_dim", default=256)
+    parser.add_argument("--feature_dim", default=512)
 
     # training parameters
     parser.add_argument("--epochs", default=30)
