@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--margin", default=0.5)
-    parser.add_argument("--lr", default=1e-3)
+    parser.add_argument("--lr", default=1e-4)
     parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--early_stop_patience", default=4)
     parser.add_argument("--lr_decay_ratio", default=0.1)
