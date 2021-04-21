@@ -113,7 +113,7 @@ class ProductFeatureEncoder(pl.LightningModule):
             xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0))
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
-            if negative_pairs.float().sum() > 0:
+            if xbm_negative_pairs.float().sum() > 0:
                 xbm_negative_loss = torch.masked_select(xbm_cosine_similarities, xbm_negative_pairs).mean() + self.margin
             else:
                 xbm_negative_loss = 0.0
