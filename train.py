@@ -54,7 +54,8 @@ if __name__ == "__main__":
     dataset_df = pd.read_csv(args.train_csv_file)
     dataset_df = shuffle(dataset_df)
 
-    train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
+    #train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
+    train_df = dataset_df
     train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(
         df=train_df,
@@ -100,7 +101,8 @@ if __name__ == "__main__":
     )
 
     # Train the model
-    trainer.fit(product_encoder, train_loader, valid_loader)
+    #trainer.fit(product_encoder, train_loader, valid_loader)
+    trainer.fit(product_encoder, train_loader)
 
     # store image feature embedding iterating over data
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
