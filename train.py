@@ -23,14 +23,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # model parameters
-    parser.add_argument("--backbone_net", default="resnet18")
+    parser.add_argument("--backbone_net", default="resnet34")
     parser.add_argument("--feature_dim", default=512)
 
     # training parameters
     parser.add_argument("--epochs", default=30)
-    parser.add_argument("--early_stop_patience", default=4)
+    parser.add_argument("--margin", default=0.5)
     parser.add_argument("--lr", default=5e-4)
     parser.add_argument("--lr_patience", default=2)
+    parser.add_argument("--early_stop_patience", default=4)
     parser.add_argument("--lr_decay_ratio", default=0.5)
     parser.add_argument("--batch", default=128)
 
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     product_encoder = ProductFeatureEncoder(
         model=embedding_net,
         lr=args.lr,
+        margin=args.margin
     )
 
     # Init DataLoader from Custom Dataset
@@ -142,6 +144,9 @@ if __name__ == "__main__":
 
     print ('\nindices')
     print (indices)
+
+    # find similarity threshold for increasing f1 score about test set(using train set)
+    
 
     import tensorflow as tf
     import tensorboard as tb

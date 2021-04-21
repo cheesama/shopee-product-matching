@@ -31,12 +31,13 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, lr_patience=2, lr_decay_ratio=0.5, memory_batch_max_num=1024):
+    def __init__(self, model, margin=0.5, lr=1e-3, lr_patience=2, lr_decay_ratio=0.5, memory_batch_max_num=1024):
         super().__init__()
 
         self.save_hyperparameters()
 
         self.model = model
+        self.margin = margin
         self.lr = lr
         self.lr_patience = lr_patience
         self.lr_decay_ratio = lr_decay_ratio
@@ -69,8 +70,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         positive_pairs = (labels == labels.transpose(1, 0)).float() - torch.eye(labels.size(0)).type_as(labels)
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        negative_loss  = F.relu(negative_pairs * cosine_similarities).sum() / max(negative_pairs.sum(), 1.0)
-        positive_loss  = F.relu(positive_pairs * cosine_similarities).sum() / max(positive_pairs.sum(), 1.0)
+        negative_loss  = F.relu(negative_pairs * cosine_similarities).sum() / max(negative_pairs.sum(), 1.0 + self.margin)
+        positive_loss  = F.relu(self.margin - positive_pairs * cosine_similarities).sum() / max(positive_pairs.sum(), 1.0)
         similarity_loss = 1 - (positive_loss - negative_loss)
 
         self.log("train/neg_sim", negative_loss, prog_bar=True)
@@ -83,8 +84,8 @@ class ProductFeatureEncoder(pl.LightningModule):
             xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0)).float()
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
-            xbm_negative_loss  = F.relu(xbm_negative_pairs * xbm_cosine_similarities).sum() / max(xbm_negative_pairs.sum(), 1.0)
-            xbm_positive_loss  = F.relu(xbm_positive_pairs * xbm_cosine_similarities).sum() / max(xbm_positive_pairs.sum(), 1.0)
+            xbm_negative_loss  = F.relu(xbm_negative_pairs * xbm_cosine_similarities).sum() / max(xbm_negative_pairs.sum(), 1.0 + self.margin)
+            xbm_positive_loss  = F.relu(self.margin - xbm_positive_pairs * xbm_cosine_similarities).sum() / max(xbm_positive_pairs.sum(), 1.0)
             xbm_loss = 1 - (xbm_positive_loss - xbm_negative_loss)
 
             self.log("train/xbm_neg_sim", xbm_negative_loss, prog_bar=True)
