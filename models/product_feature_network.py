@@ -71,7 +71,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
         negative_loss  = F.relu(((negative_pairs * cosine_similarities).sum() / max(negative_pairs.sum(), 1.0)) + self.margin)
-        positive_loss  = F.relu(self.margin - ((positive_pairs * cosine_similarities).sum() / max(positive_pairs.sum(), 1.0)))
+        positive_loss  = F.relu(1 - ((positive_pairs * cosine_similarities).sum() / max(positive_pairs.sum(), 1.0)))
         similarity_loss = positive_loss + negative_loss
 
         self.log("train/neg_sim", negative_loss, prog_bar=True)
@@ -85,7 +85,7 @@ class ProductFeatureEncoder(pl.LightningModule):
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
             xbm_negative_loss  = F.relu(((xbm_negative_pairs * xbm_cosine_similarities).sum() / max(xbm_negative_pairs.sum(), 1.0)) + self.margin)
-            xbm_positive_loss  = F.relu((self.margin - (xbm_positive_pairs * xbm_cosine_similarities).sum() / max(xbm_positive_pairs.sum(), 1.0)))
+            xbm_positive_loss  = F.relu(1 - ((xbm_positive_pairs * xbm_cosine_similarities).sum() / max(xbm_positive_pairs.sum(), 1.0)))
             xbm_loss = xbm_positive_loss + xbm_negative_loss
 
             self.log("train/xbm_neg_sim", xbm_negative_loss, prog_bar=True)
