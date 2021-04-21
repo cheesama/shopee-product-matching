@@ -140,24 +140,15 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         # in-batch contrastive loss
         with torch.no_grad():
-            negative_pairs = (labels != labels.transpose(1, 0))
-            positive_pairs = ((labels == labels.transpose(1, 0)).float() - torch.eye(labels.size(0)).type_as(labels)).bool()
+            negative_pairs = (labels != labels.transpose(1, 0)).float()
+            positive_pairs = ((labels == labels.transpose(1, 0)).float() - torch.eye(labels.size(0)).type_as(labels))
             cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-            if negative_pairs.float().sum() > 0:
-                negative_loss = torch.masked_select(cosine_similarities, negative_pairs).mean() + self.margin
-            else:
-                negative_loss = 0.0
-            
-            if positive_pairs.float().sum() > 0:
-                positive_loss = 1 - torch.masked_select(cosine_similarities, positive_pairs).mean()
-            else:
-                positive_loss = 0.0
+            negative_loss = ((cosine_similarities * negative_pairs).sum() / max(negative_pairs.sum(), 1.0)) + self.margin
+            positive_loss = 1 - ((cosine_similarities * positive_pairs).sum() / max(positive_pairs.sum(), 1.0))
             
             similarity_loss = positive_loss + negative_loss
 
-            self.log("val/neg_loss", negative_loss, prog_bar=True)
-            self.log("val/pos_loss", positive_loss, prog_bar=True)
             self.log("val_loss", similarity_loss, prog_bar=True)
 
         return {

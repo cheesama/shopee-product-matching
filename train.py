@@ -101,9 +101,8 @@ if __name__ == "__main__":
     )
 
     # Train the model
-    #trainer.fit(product_encoder, train_loader, valid_loader)
-    trainer.fit(product_encoder, train_loader)
-
+    trainer.fit(product_encoder, train_loader, valid_loader)
+    
     # store image feature embedding iterating over data
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     product_encoder.model = product_encoder.model.to(device)
