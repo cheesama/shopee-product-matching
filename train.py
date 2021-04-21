@@ -54,8 +54,7 @@ if __name__ == "__main__":
     dataset_df = pd.read_csv(args.train_csv_file)
     dataset_df = shuffle(dataset_df)
 
-    #train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
-    train_df = dataset_df
+    train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
     train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(
         df=train_df,
