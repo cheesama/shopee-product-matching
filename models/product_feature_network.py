@@ -31,13 +31,14 @@ class ProductFeatureNet(nn.Module):
 
 
 class ProductFeatureEncoder(pl.LightningModule):
-    def __init__(self, model, lr=1e-3, lr_decay_ratio=0.5, memory_batch_max_num=1024):
+    def __init__(self, model, lr=1e-3, lr_patience=2, lr_decay_ratio=0.5, memory_batch_max_num=1024):
         super().__init__()
 
         self.save_hyperparameters()
 
         self.model = model
         self.lr = lr
+        self.lr_patience = lr_patience
         self.lr_decay_ratio = lr_decay_ratio
  
         self.memory_batch_max_num = memory_batch_max_num
@@ -53,7 +54,7 @@ class ProductFeatureEncoder(pl.LightningModule):
         optim = torch.optim.Adam(self.parameters(), lr=self.lr)
         return {
             "optimizer": optim,
-            "lr_scheduler": ReduceLROnPlateau(optim, patience=1, threshold=1e-7, factor=self.lr_decay_ratio),
+            "lr_scheduler": ReduceLROnPlateau(optim, patience=self.lr_patience, threshold=1e-8, factor=self.lr_decay_ratio),
             "monitor": "val_loss",
         }
 

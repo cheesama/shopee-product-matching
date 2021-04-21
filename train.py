@@ -29,6 +29,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
+    parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--lr_decay_ratio", default=0.5)
     parser.add_argument("--batch", default=128)
 
@@ -147,7 +148,7 @@ if __name__ == "__main__":
 
     # just add part of embeddings for preveting tensorboard pending
     product_encoder.logger.experiment.add_embedding(
-        mat=embeddings_tensor[:1000], label_img=images_tensor[:1000]
+        mat=embeddings_tensor[:1500], label_img=images_tensor[:1500]
     )
     print ('\nembedding projection was saved !!')
 
