@@ -80,19 +80,12 @@ class ProductFeatureEncoder(pl.LightningModule):
         features = self.model(images)
 
         # in-batch contrastive loss
-        negative_pairs = (labels != labels.transpose(1, 0))
-        positive_pairs = ((labels == labels.transpose(1, 0)).float() - torch.eye(labels.size(0)).type_as(labels)).bool()
+        negative_pairs = (labels != labels.transpose(1, 0)).float()
+        positive_pairs = ((labels == labels.transpose(1, 0)).float() - torch.eye(labels.size(0)).type_as(labels))
         cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-        if negative_pairs.float().sum() > 0:
-            negative_loss = torch.masked_select(cosine_similarities, negative_pairs).mean() + self.margin
-        else:
-            negative_loss = 0.0
-        
-        if positive_pairs.float().sum() > 0:
-            positive_loss = 1 - torch.masked_select(cosine_similarities, positive_pairs).mean()
-        else:
-            positive_loss = 0.0
+        negative_loss = ((cosine_similarities * negative_pairs).sum() / max(negative_pairs.sum(), 1.0)) + self.margin
+        positive_loss = 1 - ((cosine_similarities * positive_pairs).sum() / max(positive_pairs.sum(), 1.0))
         
         similarity_loss = positive_loss + negative_loss
 
@@ -102,20 +95,13 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         if self.memory_batch_features is not None:
             # cross-batch contrastive loss
-            xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0))
-            xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0))
+            xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
+            xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0)).float()
             xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
 
-            if xbm_negative_pairs.float().sum() > 0:
-                xbm_negative_loss = torch.masked_select(xbm_cosine_similarities, xbm_negative_pairs).mean() + self.margin
-            else:
-                xbm_negative_loss = 0.0
+            xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / max(xbm_negative_pairs.sum(), 1.0)) + self.margin
+            xbm_positive_loss = 1 - ((xbm_cosine_similarities *  xbm_positive_pairs).sum() / max(xbm_positive_pairs.sum(), 1.0))
             
-            if xbm_positive_pairs.float().sum() > 0:
-                xbm_positive_loss = 1 - torch.masked_select(xbm_cosine_similarities, xbm_positive_pairs).mean()
-            else:
-                xbm_positive_loss = 0.0
-
             xbm_loss = xbm_positive_loss + xbm_negative_loss
 
             self.log("train/xbm_neg_loss", xbm_negative_loss, prog_bar=True)
