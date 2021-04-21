@@ -1,7 +1,6 @@
 from torchvision.models import *
 from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from transformers import pipeline
 
 from tqdm import tqdm
 
@@ -16,22 +15,16 @@ import pandas as pd
 
 
 class ProductFeatureNet(nn.Module):
-    def __init__(self, backbone_net: str, feature_dim=768):
+    def __init__(self, backbone_net: str, feature_dim=256):
         super(ProductFeatureNet, self).__init__()
 
         self.backbone_net = eval(backbone_net)(pretrained=True)
-        self.text_encoder = pipeline(
-            "feature-extraction",
-            model="distilbert-base-uncased",
-            tokenizer="distilbert-base-uncased",
-            device=0,
-        )
         self.feature_layer = nn.Linear(
             self.backbone_net.fc.out_features, feature_dim, bias=False
         )
         nn.init.xavier_uniform_(self.feature_layer.weight)
 
-    def forward(self, images, texts):
+    def forward(self, images):
         features = self.backbone_net(images)
         features = self.feature_layer(features)
         features = F.normalize(features)
