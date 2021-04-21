@@ -136,6 +136,10 @@ if __name__ == "__main__":
 
     print (distances)
 
+    import tensorflow as tf
+    import tensorboard as tb
+    tf.io.gfile = tb.compat.tensorflow_stub.io.gfile # avoid tensorboard bug
+
     product_encoder.logger.experiment.add_embedding(
         mat=embeddings_tensor, label_img=images_tensor
     )
