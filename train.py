@@ -29,6 +29,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--lr", default=1e-3)
+    parser.add_argument("--lr_decay_ratio", default=0.5)
     parser.add_argument("--batch", default=128)
 
     # dataset parameters
@@ -134,14 +135,19 @@ if __name__ == "__main__":
     index.add(embeddings_tensor.numpy())
     distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
 
+    print ('simliarities')
     print (distances)
+
+    print ('\nindices')
+    print (indices)
 
     import tensorflow as tf
     import tensorboard as tb
     tf.io.gfile = tb.compat.tensorflow_stub.io.gfile # avoid tensorboard bug
 
+    # just add part of embeddings for preveting tensorboard pending
     product_encoder.logger.experiment.add_embedding(
-        mat=embeddings_tensor, label_img=images_tensor
+        mat=embeddings_tensor[:1000], label_img=images_tensor[:1000]
     )
-    print ('embedding projection was saved !!')
+    print ('\nembedding projection was saved !!')
 
