@@ -12,7 +12,7 @@ import argparse
 import random
 
 class ProductPairDataset(Dataset):
-    def __init__(self, df, root_dir, tokenizer='distilbert-base-uncased',train_mode=True, transform=None):
+    def __init__(self, df, root_dir, train_mode=True, transform=None):
         """
         Args:
             df (DataFrame): part of entire dataframe
@@ -21,7 +21,6 @@ class ProductPairDataset(Dataset):
         """
         self.products_frame = df
         self.root_dir = root_dir
-        self.tokenizer = 
         self.train_mode = train_mode
 
         self.images = []
