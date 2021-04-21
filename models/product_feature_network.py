@@ -19,7 +19,7 @@ class ProductFeatureNet(nn.Module):
         super(ProductFeatureNet, self).__init__()
 
         self.backbone_net = eval(backbone_net)(pretrained=True)
-        self.text_encoder = pipeline('feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased')
+        #self.text_encoder = pipeline('feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased')
         self.feature_layer = nn.Linear(
             self.backbone_net.fc.out_features, feature_dim, bias=False
         )
