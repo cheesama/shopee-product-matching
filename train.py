@@ -29,10 +29,10 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=30)
     parser.add_argument("--margin", default=0.5)
-    parser.add_argument("--lr", default=5e-4)
+    parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--early_stop_patience", default=4)
-    parser.add_argument("--lr_decay_ratio", default=0.5)
+    parser.add_argument("--lr_decay_ratio", default=0.1)
     parser.add_argument("--batch", default=128)
 
     # dataset parameters
@@ -47,9 +47,7 @@ if __name__ == "__main__":
         backbone_net=args.backbone_net, feature_dim=args.feature_dim
     )
     product_encoder = ProductFeatureEncoder(
-        model=embedding_net,
-        lr=args.lr,
-        margin=args.margin
+        model=embedding_net, lr=args.lr, margin=args.margin
     )
 
     # Init DataLoader from Custom Dataset
@@ -66,11 +64,11 @@ if __name__ == "__main__":
     train_loader = DataLoader(
         train_dataset,
         num_workers=multiprocessing.cpu_count(),
-        #batch_size=args.batch,
-        batch_sampler = train_batch_sampler
+        # batch_size=args.batch,
+        batch_sampler=train_batch_sampler,
     )
 
-    valid_df = dataset_df[len(train_df):]
+    valid_df = dataset_df[len(train_df) :]
     valid_batch_sampler = PositivePairAugBatchSampler(valid_df)
     valid_dataset = ProductPairDataset(
         df=valid_df,
@@ -78,20 +76,18 @@ if __name__ == "__main__":
         train_mode=False,
     )
     valid_loader = DataLoader(
-        valid_dataset, 
+        valid_dataset,
         num_workers=multiprocessing.cpu_count(),
-        batch_sampler = valid_batch_sampler
+        batch_sampler=valid_batch_sampler,
     )
 
     test_loader = DataLoader(
-        valid_dataset, 
-        num_workers=multiprocessing.cpu_count(),
-        batch_size=args.batch
+        valid_dataset, num_workers=multiprocessing.cpu_count(), batch_size=args.batch
     )
 
     early_stopping = EarlyStopping("val_loss", patience=args.early_stop_patience)
-    lr_monitor = LearningRateMonitor(logging_interval='step')
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss', mode='min')
+    lr_monitor = LearningRateMonitor(logging_interval="step")
+    checkpoint_callback = ModelCheckpoint(monitor="val_loss", mode="min")
 
     # Initialize a trainer
     trainer = pl.Trainer(
@@ -100,7 +96,7 @@ if __name__ == "__main__":
         accelerator="ddp",
         max_epochs=args.epochs,
         callbacks=[early_stopping, lr_monitor, checkpoint_callback],
-        replace_sampler_ddp=False
+        replace_sampler_ddp=False,
     )
 
     # Train the model
@@ -131,30 +127,35 @@ if __name__ == "__main__":
     df = pd.read_csv(args.train_csv_file)
 
     matches_column = []
-    for i in tqdm(range(len(df)), desc='matching labels to each posting ...'):
-        matches_column.append(' '.join(list(df[df['label_group']==df.iloc[i]['label_group']]['posting_id'])))
-    df['macthes'] = matches_column
+    for i in tqdm(range(len(df)), desc="matching labels to each posting ..."):
+        matches_column.append(
+            " ".join(
+                list(df[df["label_group"] == df.iloc[i]["label_group"]]["posting_id"])
+            )
+        )
+    df["macthes"] = matches_column
 
     index = faiss.IndexFlatIP(args.feature_dim)
     index.add(embeddings_tensor.numpy())
-    distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
+    distances, indices = index.search(
+        embeddings_tensor.numpy(), k=50
+    )  # search max 50 candidates
 
-    print ('simliarities')
-    print (distances)
+    print("simliarities")
+    print(distances)
 
-    print ('\nindices')
-    print (indices)
+    print("\nindices")
+    print(indices)
 
     # find similarity threshold for increasing f1 score about test set(using train set)
-    
 
     import tensorflow as tf
     import tensorboard as tb
-    tf.io.gfile = tb.compat.tensorflow_stub.io.gfile # avoid tensorboard bug
+
+    tf.io.gfile = tb.compat.tensorflow_stub.io.gfile  # avoid tensorboard bug
 
     # just add part of embeddings for preveting tensorboard pending
     product_encoder.logger.experiment.add_embedding(
         mat=embeddings_tensor[:1000], label_img=images_tensor[:1000]
     )
-    print ('\nembedding projection was saved !!')
-
+    print("\nembedding projection was saved !!")
