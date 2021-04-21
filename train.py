@@ -123,11 +123,6 @@ if __name__ == "__main__":
             else:
                 images_tensor = torch.cat([images_tensor, images.cpu()])
 
-    product_encoder.logger.experiment.add_embedding(
-        mat=embeddings_tensor, label_img=images_tensor
-    )
-    print ('embedding projection was saved !!')
-
     df = pd.read_csv(args.train_csv_file)
 
     matches_column = []
@@ -140,4 +135,9 @@ if __name__ == "__main__":
     distances, indices = index.search(embeddings_tensor.numpy(), k=50) # search max 50 candidates
 
     print (distances)
+
+    product_encoder.logger.experiment.add_embedding(
+        mat=embeddings_tensor, label_img=images_tensor
+    )
+    print ('embedding projection was saved !!')
 
