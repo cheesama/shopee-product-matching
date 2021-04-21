@@ -28,7 +28,8 @@ if __name__ == "__main__":
 
     # training parameters
     parser.add_argument("--epochs", default=30)
-    parser.add_argument("--lr", default=1e-3)
+    parser.add_argument("--early_stop_patience", default=4)
+    parser.add_argument("--lr", default=5e-4)
     parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--lr_decay_ratio", default=0.5)
     parser.add_argument("--batch", default=128)
@@ -86,7 +87,7 @@ if __name__ == "__main__":
         batch_size=args.batch
     )
 
-    early_stopping = EarlyStopping("val_loss")
+    early_stopping = EarlyStopping("val_loss", patience=args.early_stop_patience)
     lr_monitor = LearningRateMonitor(logging_interval='step')
     checkpoint_callback = ModelCheckpoint(monitor='val_loss', mode='min')
 
