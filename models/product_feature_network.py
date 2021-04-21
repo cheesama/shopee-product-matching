@@ -1,6 +1,7 @@
 from torchvision.models import *
 from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from transformers import pipeline
 
 from tqdm import tqdm
 
@@ -14,10 +15,11 @@ import PIL
 import pandas as pd
 
 class ProductFeatureNet(nn.Module):
-    def __init__(self, backbone_net: str, feature_dim=512):
+    def __init__(self, backbone_net: str, feature_dim=768):
         super(ProductFeatureNet, self).__init__()
 
         self.backbone_net = eval(backbone_net)(pretrained=True)
+        self.text_encoder = pipeline('feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased')
         self.feature_layer = nn.Linear(
             self.backbone_net.fc.out_features, feature_dim, bias=False
         )
@@ -125,10 +127,12 @@ class ProductFeatureEncoder(pl.LightningModule):
             negative_pairs = (labels != labels.transpose(1, 0)).float()
             cosine_similarities = torch.mm(features, features.transpose(1, 0))
 
-            negative_loss  = (negative_pairs * cosine_similarities).clamp(min=0.0).mean()
-            positive_loss  = (1 - positive_pairs * cosine_similarities).mean()
-            similarity_loss = negative_loss + positive_loss
+            negative_loss  = (negative_pairs * cosine_similarities).sum() / max(negative_pairs.sum(), 1.0) + self.margin
+            positive_loss  = 1 - ((positive_pairs * cosine_similarities).sum() / max(positive_pairs.sum(), 1.0))
+            similarity_loss = positive_loss + negative_loss
 
+            self.log("val/neg_loss", negative_loss, prog_bar=True)
+            self.log("val/pos_loss", positive_loss, prog_bar=True)
             self.log("val_loss", similarity_loss, prog_bar=True)
 
         return {
