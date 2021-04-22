@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # training parameters
     parser.add_argument("--epochs", default=10)
     parser.add_argument("--margin", default=0.5)
-    parser.add_argument("--lr", default=1e-4)
+    parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--early_stop_patience", default=5)
     parser.add_argument("--lr_decay_ratio", default=0.1)
@@ -48,7 +48,10 @@ if __name__ == "__main__":
         backbone_net=args.backbone_net, feature_dim=args.feature_dim
     )
     product_encoder = ProductFeatureEncoder(
-        model=embedding_net, lr=args.lr, margin=args.margin, memory_batch_max_num=args.memory_batch_max_num
+        model=embedding_net,
+        lr=args.lr,
+        margin=args.margin,
+        memory_batch_max_num=args.memory_batch_max_num,
     )
 
     # Init DataLoader from Custom Dataset
@@ -102,7 +105,7 @@ if __name__ == "__main__":
 
     # Train the model
     trainer.fit(product_encoder, train_loader, valid_loader)
-    
+
     # store image feature embedding iterating over data
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     product_encoder.model = product_encoder.model.to(device)
