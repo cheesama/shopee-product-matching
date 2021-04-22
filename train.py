@@ -27,13 +27,14 @@ if __name__ == "__main__":
     parser.add_argument("--feature_dim", default=768)
 
     # training parameters
-    parser.add_argument("--epochs", default=30)
+    parser.add_argument("--epochs", default=10)
     parser.add_argument("--margin", default=0.5)
     parser.add_argument("--lr", default=1e-4)
     parser.add_argument("--lr_patience", default=2)
     parser.add_argument("--early_stop_patience", default=4)
     parser.add_argument("--lr_decay_ratio", default=0.1)
     parser.add_argument("--batch", default=128)
+    parser.add_argument("--memory_batch_max_num", default=2048)
 
     # dataset parameters
     parser.add_argument("--train_portion", default=0.9)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         backbone_net=args.backbone_net, feature_dim=args.feature_dim
     )
     product_encoder = ProductFeatureEncoder(
-        model=embedding_net, lr=args.lr, margin=args.margin
+        model=embedding_net, lr=args.lr, margin=args.margin, memory_batch_max_num=args.memory_batch_max_num
     )
 
     # Init DataLoader from Custom Dataset
