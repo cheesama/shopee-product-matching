@@ -31,6 +31,7 @@ class ProductFeatureNet(nn.Module):
 
         return features
 
+
 class ProductFeatureEncoder(pl.LightningModule):
     def __init__(
         self,
@@ -61,7 +62,16 @@ class ProductFeatureEncoder(pl.LightningModule):
         return features
 
     def configure_optimizers(self):
-        optim = torch.optim.Adam(self.parameters(), lr=self.lr)
+        optim = torch.optim.Adam(
+            [
+                {"params": self.model.backbone_net.parameters(), "lr": self.lr * 0.1},
+                {"params": self.model.feature_layer.parameters()},
+            ],
+            #self.parameters(),
+            lr=self.lr,
+            weight_decay=0.01
+        )
+
         return {
             "optimizer": optim,
             "lr_scheduler": ReduceLROnPlateau(
@@ -81,23 +91,32 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         # update memory batch
         if self.memory_batch_features is not None:
-            self.memory_batch_features = torch.cat([self.memory_batch_features, features.detach()])
-            self.memory_batch_labels = torch.cat([self.memory_batch_labels, labels.detach()])
+            self.memory_batch_features = torch.cat(
+                [self.memory_batch_features, features.detach()]
+            )
+            self.memory_batch_labels = torch.cat(
+                [self.memory_batch_labels, labels.detach()]
+            )
         else:
             self.memory_batch_features = features.detach()
             self.memory_batch_labels = labels.detach()
 
-        self.memory_batch_features = self.memory_batch_features[-self.memory_batch_max_num :]
-        self.memory_batch_labels = self.memory_batch_labels[-self.memory_batch_max_num :]
+        self.memory_batch_features = self.memory_batch_features[
+            -self.memory_batch_max_num :
+        ]
+        self.memory_batch_labels = self.memory_batch_labels[
+            -self.memory_batch_max_num :
+        ]
 
         # cross-batch contrastive loss
-        xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
-        xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0)).float()
-        xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
+        xbm_negative_pairs = (labels != self.memory_batch_labels.t()).float()
+        xbm_positive_pairs = (labels == self.memory_batch_labels.t()).float()
+        xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.t())
 
-        xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / max(xbm_negative_pairs.sum(), 1.0)).clamp(min=0)
-        xbm_positive_loss = 1 - ((xbm_cosine_similarities *  xbm_positive_pairs).sum() / max(xbm_positive_pairs.sum(), 1.0))
-        
+        #back-prop only current batch(not in memory batch)
+        xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / labels.size(0)).clamp(min=0)
+        xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / labels.size(0))
+
         xbm_loss = xbm_positive_loss + xbm_negative_loss
 
         self.log("train/neg_loss", xbm_negative_loss, prog_bar=True)
@@ -114,23 +133,37 @@ class ProductFeatureEncoder(pl.LightningModule):
 
         with torch.no_grad():
             if self.memory_batch_features is not None:
-                self.memory_batch_features = torch.cat([self.memory_batch_features, features.detach()])
-                self.memory_batch_labels = torch.cat([self.memory_batch_labels, labels.detach()])
+                self.memory_batch_features = torch.cat(
+                    [self.memory_batch_features, features.detach()]
+                )
+                self.memory_batch_labels = torch.cat(
+                    [self.memory_batch_labels, labels.detach()]
+                )
             else:
                 self.memory_batch_features = features.detach()
                 self.memory_batch_labels = labels.detach()
 
-            self.memory_batch_features = self.memory_batch_features[-self.memory_batch_max_num :]
-            self.memory_batch_labels = self.memory_batch_labels[-self.memory_batch_max_num :]
+            self.memory_batch_features = self.memory_batch_features[
+                -self.memory_batch_max_num :
+            ]
+            self.memory_batch_labels = self.memory_batch_labels[
+                -self.memory_batch_max_num :
+            ]
 
             # cross-batch contrastive loss
-            xbm_negative_pairs = (labels != self.memory_batch_labels.transpose(1, 0)).float()
-            xbm_positive_pairs = (labels == self.memory_batch_labels.transpose(1, 0)).float()
-            xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.transpose(1, 0))
+            xbm_negative_pairs = (
+                labels != self.memory_batch_labels.transpose(1, 0)
+            ).float()
+            xbm_positive_pairs = (
+                labels == self.memory_batch_labels.transpose(1, 0)
+            ).float()
+            xbm_cosine_similarities = torch.mm(
+                features, self.memory_batch_features.transpose(1, 0)
+            )
 
-            xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / max(xbm_negative_pairs.sum(), 1.0)).clamp(min=0)
-            xbm_positive_loss = 1 - ((xbm_cosine_similarities *  xbm_positive_pairs).sum() / max(xbm_positive_pairs.sum(), 1.0))
-            
+            xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / labels.size(0)).clamp(min=0)
+            xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / labels.size(0))
+
             xbm_loss = xbm_positive_loss + xbm_negative_loss
 
             self.log("val_loss", xbm_loss, prog_bar=True)
