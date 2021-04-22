@@ -114,8 +114,8 @@ class ProductFeatureEncoder(pl.LightningModule):
         xbm_cosine_similarities = torch.mm(features, self.memory_batch_features.t())
 
         #back-prop only current batch(not in memory batch)
-        xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / labels.size(0)).clamp(min=0)
-        xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / labels.size(0))
+        xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / max(xbm_negative_pairs.sum(), 1.0)).clamp(min=0)
+        xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / max(xbm_positive_pairs.sum(), 1.0))
 
         xbm_loss = xbm_positive_loss + xbm_negative_loss
 
@@ -161,8 +161,8 @@ class ProductFeatureEncoder(pl.LightningModule):
                 features, self.memory_batch_features.transpose(1, 0)
             )
 
-            xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / labels.size(0)).clamp(min=0)
-            xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / labels.size(0))
+            xbm_negative_loss = ((xbm_cosine_similarities * xbm_negative_pairs).sum() / max(xbm_negative_pairs.sum(), 1.0)).clamp(min=0)
+            xbm_positive_loss = 1 - ((xbm_cosine_similarities * xbm_positive_pairs).sum() / max(xbm_positive_pairs.sum(), 1.0))
 
             xbm_loss = xbm_positive_loss + xbm_negative_loss
 
