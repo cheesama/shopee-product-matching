@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # model parameters
-    parser.add_argument("--backbone_net", default="resnet34")
+    parser.add_argument("--backbone_net", default="resnet50")
     parser.add_argument("--feature_dim", default=768)
 
     # training parameters
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser.add_argument("--margin", default=0.5)
     parser.add_argument("--lr", default=1e-4)
     parser.add_argument("--lr_patience", default=2)
-    parser.add_argument("--early_stop_patience", default=4)
+    parser.add_argument("--early_stop_patience", default=5)
     parser.add_argument("--lr_decay_ratio", default=0.1)
     parser.add_argument("--batch", default=128)
     parser.add_argument("--memory_batch_max_num", default=2048)
