@@ -160,6 +160,6 @@ if __name__ == "__main__":
 
     # just add part of embeddings for preveting tensorboard pending
     product_encoder.logger.experiment.add_embedding(
-        mat=embeddings_tensor[:1000], label_img=images_tensor[:1000]
+        mat=embeddings_tensor[:500], label_img=images_tensor[:500]
     )
     print("\nembedding projection was saved !!")
