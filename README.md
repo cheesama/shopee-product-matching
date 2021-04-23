@@ -10,6 +10,28 @@ Retrieve same product using given images and texts per each product(below are ex
 
 ## How to solve
 
-Using Metric Learning
+### train dataset analysis 
+- 34250 image & text information
+- total 11014 label_group(classes)
+- 2 ~ 51 same class instance num( class imbalance)
+- It's **hard to solve as Classification model!**
+
+### Using Metric Learning
+
+Basic Concept
 
 ![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fdpuky0%2FbtqIjeVyxZo%2FSnmmbKkMGT6aD1JSWybngk%2Fimg.png)
+
+Feature Extraction from two images
+
+![](https://www.mdpi.com/symmetry/symmetry-10-00385/article_deploy/html/images/symmetry-10-00385-g001.png)
+- It can just few examples in one mini-batch(calculate mini-batch size times) -> how to get more pair features?
+
+Using in-batch constrastive loss
+
+![In-batch constrastive learning](https://d3i71xaburhd42.cloudfront.net/bbe55736e6f4681c54ec4a889b9b12b6e4c25b56/2-Figure1-1.png)
+- It calculate all relations in one mini-batch(calculate mini-batch size * mini-batch size times)
+
+## To-do
+
+## References
