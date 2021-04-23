@@ -25,8 +25,8 @@ class ProductFeatureNet(nn.Module):
         self.backbone_net = eval(backbone_net)(pretrained=True)
 
         self.feature_layer = nn.Linear(self.backbone_net.fc.out_features, feature_dim)
-        nn.init.kaiming_uniform_(self.feature_layer.weight)
-        nn.init.kaiming_uniform_(self.feature_layer.bias)
+        nn.init.xavier_uniform_(self.feature_layer.weight)
+        nn.init.xavier_uniform_(self.feature_layer.bias)
 
     def forward(self, images):
         features = self.backbone_net(images)
