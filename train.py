@@ -27,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument("--feature_dim", default=768)
 
     # training parameters
-    parser.add_argument("--epochs", default=10)
+    parser.add_argument("--epochs", default=15)
     parser.add_argument("--margin", default=0.5)
     parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--lr_patience", default=2)
@@ -68,8 +68,9 @@ if __name__ == "__main__":
     train_loader = DataLoader(
         train_dataset,
         num_workers=multiprocessing.cpu_count(),
-        # batch_size=args.batch,
-        batch_sampler=train_batch_sampler,
+        batch_size=args.batch,
+        shuffle=True,
+        #batch_sampler=train_batch_sampler,
     )
 
     valid_df = dataset_df[len(train_df) :]
