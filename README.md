@@ -29,7 +29,7 @@ appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of co
 
 2) Feature Extraction from two images
 ![](https://www.mdpi.com/symmetry/symmetry-10-00385/article_deploy/html/images/symmetry-10-00385-g001.png)
-- It can just few examples in one mini-batch(calculate mini-batch size times) -> how to get more pair features?
+- It can handle just few examples in one mini-batch(calculate mini-batch size times) -> how to get more pair features?
 
 ---
 
@@ -46,6 +46,12 @@ appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of co
 - Model can watch previous batch output from via queue and use it to calcluate pair distances
 
 ---
+
+5. Each Batch have both soft & hare pairs. it is proper to apply same margin?
+![multi_similariry_pair_mining](./img/multi_similariry_pair_mining)
+- This mining use cosine similariy as distance metric
+- Negative pairs are chosen if they have similarity greater than the hardest positive pair, minus pre-defined margin
+- Positive pairs are chosen if they have similarity less than the hardest negative pair, plus pre-defined margin
 
 ## To-do
 - compound Text Feaure(TF-IDF of DistilBERT ...)
