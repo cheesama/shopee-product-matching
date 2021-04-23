@@ -18,25 +18,41 @@ Retrieve same product using given images and texts per each product(below are ex
 
 ### Using Metric Learning
 
-Basic Concept
+1) Basic Concept
 ![](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fdpuky0%2FbtqIjeVyxZo%2FSnmmbKkMGT6aD1JSWybngk%2Fimg.png)
 
-Feature Extraction from two images
+![](https://kevinmusgrave.github.io/pytorch-metric-learning/imgs/contrastive_loss_similarity_equation.png)
+
+appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of cosine similarity
+
+---
+
+2) Feature Extraction from two images
 ![](https://www.mdpi.com/symmetry/symmetry-10-00385/article_deploy/html/images/symmetry-10-00385-g001.png)
 - It can just few examples in one mini-batch(calculate mini-batch size times) -> how to get more pair features?
 
-Using in-batch constrastive loss
+---
+
+3) Using in-batch constrastive loss
 ![In-batch constrastive learning](./imgs/in_batch_contrastive_learning.png)
 - It calculate all relations in one mini-batch(calculate mini-batch size * mini-batch size times)
 - But still there are a lot of pairs information outside of bathes, how to expand it?
 
-Using external batch output when comparing current batch
+---
+
+4) Using external batch output when comparing current batch
 ![](https://i.ytimg.com/vi/SDKDSvv9oTk/maxresdefault.jpg)
 - It has internal batch output queue which store latest batches & upate
 - Model can watch previous batch output from via queue and use it to calcluate pair distances
 
+---
+
 ## To-do
 - Compound Text Feaure(TF-IDF of DistilBERT ...)
 - hyper-parameter tuning
+- submission to kaggle
 
 ## References
+[Cross-Batch Memory for Embedding Learning](https://arxiv.org/pdf/1912.06798.pdf)
+
+[pytorch-metric-learning](https://kevinmusgrave.github.io/pytorch-metric-learning/)
