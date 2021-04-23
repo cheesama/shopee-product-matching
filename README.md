@@ -48,7 +48,7 @@ appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of co
 ---
 
 5. Each Batch have both soft & hare pairs. it is proper to apply same margin?
-![multi_similariry_pair_mining](./img/multi_similariry_pair_mining.png)
+![multi_similariry_pair_mining](./imgs/multi_similarity_pair_mining.png)
 - This mining use cosine similariy as distance metric
 - Negative pairs are chosen if they have similarity greater than the hardest positive pair, minus pre-defined margin
 - Positive pairs are chosen if they have similarity less than the hardest negative pair, plus pre-defined margin
@@ -61,5 +61,7 @@ appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of co
 
 ## References
 [Cross-Batch Memory for Embedding Learning](https://arxiv.org/pdf/1912.06798.pdf)
+
+[Multi-Similarity Loss with General Pair Weighting for Deep Metric Learning](https://arxiv.org/pdf/1904.06627.pdf)
 
 [pytorch-metric-learning](https://kevinmusgrave.github.io/pytorch-metric-learning/)
