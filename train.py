@@ -10,6 +10,7 @@ from tqdm import tqdm
 from models.product_feature_network import ProductFeatureNet, ProductFeatureEncoder
 from data_loader.pair_dataset import ProductPairDataset
 from data_loader.custom_batch_sampler import PositivePairAugBatchSampler
+from metric.f1 import f1_score
 
 import pytorch_lightning as pl
 import torch
@@ -173,10 +174,7 @@ if __name__ == "__main__":
                 df.iloc[index[selected_index]]['posting_id']
             matches_pred.append(' '.join(each_matches_pred))
         
+        df['macthes_pred'] = matches_pred
+        df['f1'] = df.apply(lambda x:f1_score(df['matches'], df['macthes_pred']), axis=1)
 
-
-
-        
-
-
-
+        print (f"f1 score of similarity threshold({threshold}): {df['f1'].mean()}")

@@ -1,4 +1,4 @@
-def f1_score(y_true, y_pred):
+def f1_score(y_true:list, y_pred:list):
     '''
     precision = len(intersection(y_true, y_pred)) / len(y_pred)
     recall = len(intersection(y_true, y_pred)) / len(y_true)
