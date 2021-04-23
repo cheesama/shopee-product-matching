@@ -165,6 +165,17 @@ if __name__ == "__main__":
 
     # search similarity threshold for optimal f1 score
     for threshold in tqdm(list(np.arange(0.0, 1.0, 0.1)), desc='searching similarity threshold for optimal f1 score ...'):
+        matches_pred = []
+        for distance, index in zip(distances, indices):
+            selected_distance = np.where(distance >= threshold)
+            each_matches_pred = []
+            for selected_index in selected_distance:
+                df.iloc[index[selected_index]]['posting_id']
+            matches_pred.append(' '.join(each_matches_pred))
+        
+
+
+
         
 
 
