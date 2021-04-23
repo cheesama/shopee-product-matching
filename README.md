@@ -29,7 +29,7 @@ Feature Extraction from two images
 
 Using in-batch constrastive loss
 
-![In-batch constrastive learning](https://d3i71xaburhd42.cloudfront.net/bbe55736e6f4681c54ec4a889b9b12b6e4c25b56/2-Figure1-1.png)
+![In-batch constrastive learning](./imgs/in_batch_contrastive_learning.png)
 - It calculate all relations in one mini-batch(calculate mini-batch size * mini-batch size times)
 
 ## To-do
