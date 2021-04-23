@@ -2,6 +2,7 @@ kaggle
 
 torch
 pytorch-lightning
+pytorch-metric-learning
 torchvision
 scikit-learn
 transformers
