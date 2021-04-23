@@ -23,8 +23,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # model parameters
-    parser.add_argument("--backbone_net", default="resnet34")
-    parser.add_argument("--feature_dim", default=768)
+    parser.add_argument("--backbone_net", default="resnet50")
+    parser.add_argument("--feature_dim", default=512)
 
     # training parameters
     parser.add_argument("--epochs", default=10)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("--early_stop_patience", default=5)
     parser.add_argument("--lr_decay_ratio", default=0.1)
     parser.add_argument("--batch", default=128)
-    parser.add_argument("--memory_batch_max_num", default=1024)
+    parser.add_argument("--memory_batch_max_num", default=2048)
 
     # dataset parameters
     parser.add_argument("--train_portion", default=0.9)
@@ -152,8 +152,6 @@ if __name__ == "__main__":
     print("\nindices")
     print(indices)
 
-    # find similarity threshold for increasing f1 score about test set(using train set)
-
     import tensorflow as tf
     import tensorboard as tb
 
@@ -164,3 +162,10 @@ if __name__ == "__main__":
         mat=embeddings_tensor[:500], label_img=images_tensor[:500]
     )
     print("\nembedding projection was saved !!")
+
+    # search similarity threshold for optimal f1 score
+    for threshold in tqdm(list(np.arange(0.0, 1.0, 0.1)), desc='searching similarity threshold for optimal f1 score ...'):
+        
+
+
+
