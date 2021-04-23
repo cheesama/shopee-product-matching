@@ -50,7 +50,6 @@ appropriate values would be **pos_margin = 1 and neg_margin = 0**, in case of co
 ## To-do
 - compound Text Feaure(TF-IDF of DistilBERT ...)
 - add external dataset([deepFashion](http://mmlab.ie.cuhk.edu.hk/projects/DeepFashion.html), SOP ...)
-  - 
 - hyper-parameter tuning
 - submission to kaggle
 
