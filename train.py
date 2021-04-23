@@ -68,9 +68,9 @@ if __name__ == "__main__":
     train_loader = DataLoader(
         train_dataset,
         num_workers=multiprocessing.cpu_count(),
-        batch_size=args.batch,
-        shuffle=True,
-        #batch_sampler=train_batch_sampler,
+        #batch_size=args.batch,
+        #shuffle=True,
+        batch_sampler=train_batch_sampler,
     )
 
     valid_df = dataset_df[len(train_df) :]
