@@ -7,4 +7,4 @@ def f1_score(y_true:list, y_pred:list):
     
     intersection = list(set(y_true) & set(y_pred))
     
-    return (2 * intersection) / float(len(y_true) + len(y_pred))
+    return (2 * len(intersection)) / float(len(y_true) + len(y_pred))

@@ -77,7 +77,7 @@ class ProductFeatureEncoder(pl.LightningModule):
             ],
             #self.parameters(),
             lr=self.lr,
-            weight_decay=0.01
+            weight_decay=5e-4
         )
 
         return {
