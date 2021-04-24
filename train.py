@@ -176,7 +176,7 @@ if __name__ == "__main__":
             selected_distance = list(np.where(distance >= threshold))
             each_matches_pred = []
             for selected_index in selected_distance:
-                each_matches_pred.append(df.iloc[index[selected_index]].values[0][0]) # posting_id
+                each_matches_pred.append(df.iloc[index[selected_index]].values[0]) # posting_id
 
             matches_pred.append(' '.join(each_matches_pred))
         
