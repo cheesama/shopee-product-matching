@@ -8,3 +8,5 @@ scikit-learn
 transformers
 
 faiss-cpu
+
+requests

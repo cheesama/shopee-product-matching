@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--feature_dim", default=512)
 
     # training parameters
-    parser.add_argument("--epochs", default=15)
+    parser.add_argument("--epochs", default=20)
     parser.add_argument("--margin", default=0.5)
     parser.add_argument("--lr", default=1e-3)
     parser.add_argument("--lr_patience", default=2)
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     for threshold in tqdm(list(np.arange(0.5, 1.0, 0.05)), desc='searching similarity threshold for optimal f1 score ...'):
         matches_pred = []
         for distance, index in zip(distances, indices):
-            selected_distance = list(np.where(distance >= threshold))
+            selected_distance = list(np.where(distance >= threshold))[0]
             each_matches_pred = []
             for selected_index in selected_distance:
                 each_matches_pred.append(df.iloc[index[selected_index]].values[0]) # posting_id
