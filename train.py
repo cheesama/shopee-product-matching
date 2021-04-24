@@ -170,13 +170,14 @@ if __name__ == "__main__":
     print("\nembedding projection was saved !!")
 
     # search similarity threshold for optimal f1 score
-    for threshold in tqdm(list(np.arange(0.0, 1.0, 0.1)), desc='searching similarity threshold for optimal f1 score ...'):
+    for threshold in tqdm(list(np.arange(0.5, 1.0, 0.05)), desc='searching similarity threshold for optimal f1 score ...'):
         matches_pred = []
         for distance, index in zip(distances, indices):
             selected_distance = list(np.where(distance >= threshold))
             each_matches_pred = []
             for selected_index in selected_distance:
-                each_matches_pred.append(df.iloc[index[selected_index]]['posting_id'].split('\n')[0])
+                each_matches_pred.append(df.iloc[index[selected_index]].values[0][0]) # posting_id
+
             matches_pred.append(' '.join(each_matches_pred))
         
         df['macthes_pred'] = matches_pred
