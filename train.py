@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # model parameters
-    parser.add_argument("--backbone_net", default="resnet18")
+    parser.add_argument("--backbone_net", default="resnet34")
     parser.add_argument("--feature_dim", default=768)
 
     # training parameters
@@ -135,6 +135,7 @@ if __name__ == "__main__":
 
     for images, text_features, labels in tqdm(test_loader, desc="storing image features ..."):
         images = images.to(device)
+        text_features = text_features.to(device)
         with torch.no_grad():
             features = product_encoder.model(images, text_features)
 
