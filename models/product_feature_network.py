@@ -61,7 +61,7 @@ class ProductFeatureEncoder(pl.LightningModule):
             losses.ContrastiveLoss(pos_margin=1, neg_margin=0, distance=CosineSimilarity()),
             self.model.feature_dim, 
             memory_size=self.memory_batch_max_num, 
-            miner=miners.MultiSimilarityMiner()
+            miner=miners.MultiSimilarityMiner(epsilon=self.margin)
         )
 
     def forward(self, images):
