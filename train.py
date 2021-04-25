@@ -20,6 +20,10 @@ import multiprocessing
 import numpy as np
 import faiss
 import gc
+import tensorflow as tf
+import tensorboard as tb
+
+tf.io.gfile = tb.compat.tensorflow_stub.io.gfile  # avoid tensorboard bug
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -136,12 +140,18 @@ if __name__ == "__main__":
             if embeddings_tensor is None:
                 embeddings_tensor = features.cpu()
             else:
-                embeddings_tensor = torch.cat([embeddings_tensor, features.cpu()])
+                embeddings_tensor = torch.cat([embeddings_tensor, features.detach().cpu()])
 
             if images_tensor is None:
                 images_tensor = images.cpu()
             else:
                 images_tensor = torch.cat([images_tensor, images.cpu()])
+
+    # just add part of embeddings for preveting tensorboard pending
+    product_encoder.logger.experiment.add_embedding(
+        mat=embeddings_tensor[:500], label_img=images_tensor[:500]
+    )
+    print("\nembedding projection was saved !!")
 
     df = pd.read_csv(args.train_csv_file)
 
@@ -165,17 +175,6 @@ if __name__ == "__main__":
 
     print("\nindices")
     print(indices)
-
-    import tensorflow as tf
-    import tensorboard as tb
-
-    tf.io.gfile = tb.compat.tensorflow_stub.io.gfile  # avoid tensorboard bug
-
-    # just add part of embeddings for preveting tensorboard pending
-    product_encoder.logger.experiment.add_embedding(
-        mat=embeddings_tensor[:500], label_img=images_tensor[:500]
-    )
-    print("\nembedding projection was saved !!")
 
     # search similarity threshold for optimal f1 score
     max_f1 = 0
