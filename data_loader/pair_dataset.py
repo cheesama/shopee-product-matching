@@ -13,7 +13,7 @@ import argparse
 import random
 
 class ProductPairDataset(Dataset):
-    def __init__(self, df, root_dir, train_mode=True, transform=None):
+    def __init__(self, df, root_dir, train_mode=True, transform=None, batch_size=128):
         """
         Args:
             df (DataFrame): part of entire dataframe
@@ -23,12 +23,17 @@ class ProductPairDataset(Dataset):
         self.products_frame = df
         self.root_dir = root_dir
         self.train_mode = train_mode
+        self.batch_size = batch_size
 
         #set gpu based pipeline
         text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased', device=0)
 
-        print ('preparing text features in advance ...')
-        self.text_features = text_feature_extractor(list(self.products_frame['title']))[:,0,:]
+        self.text_features = None
+        for i in tqdm(range(len(self.products_frame) // self.batch_size), desc='preparing text features in advance ...''):
+            if self.text_features is None:
+                self.text_features = text_feature_extractor(list(self.products_frame['title'])[i:i * self.batch_size])[:,0,:]
+            else:
+                self.text_features = torch.cat([self.text_features, text_feature_extractor(list(self.products_frame['title'])[i:i * self.batch_size])[:,0,:]])
         
         if transform is not None:
             self.transform = transform
