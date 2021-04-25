@@ -29,7 +29,7 @@ class ProductPairDataset(Dataset):
         text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased', device=0)
 
         self.text_features = None
-        for i in tqdm(range(len(self.products_frame) // self.batch_size), desc='preparing text features in advance ...''):
+        for i in tqdm(range(len(self.products_frame) // self.batch_size), desc='preparing text features in advance ...'):
             if self.text_features is None:
                 self.text_features = text_feature_extractor(list(self.products_frame['title'])[i:i * self.batch_size])[:,0,:]
             else:
