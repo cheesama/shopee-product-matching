@@ -29,11 +29,13 @@ class ProductPairDataset(Dataset):
         text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased', device=0)
 
         self.text_features = None
-        for i in tqdm(range(len(self.products_frame) // self.batch_size), desc='preparing text features in advance ...'):
+        for i in tqdm(range(len(self.products_frame) // self.batch_size + 1), desc='preparing text features in advance ...'):
+            extracted_features = text_feature_extractor(list(self.products_frame['title'])[i * self.batch_size:(i + 1) * self.batch_size])[:,0,:]
+            extracted_features = torch.FloatTensor(extracted_features)
             if self.text_features is None:
-                self.text_features = text_feature_extractor(list(self.products_frame['title'])[i:i * self.batch_size])[:,0,:]
+                self.text_features = extracted_features
             else:
-                self.text_features = torch.cat([self.text_features, text_feature_extractor(list(self.products_frame['title'])[i:i * self.batch_size])[:,0,:]])
+                self.text_features = torch.cat([self.text_features, extracted_features])
         
         if transform is not None:
             self.transform = transform
