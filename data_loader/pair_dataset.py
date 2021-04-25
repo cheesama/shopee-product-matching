@@ -28,7 +28,7 @@ class ProductPairDataset(Dataset):
         text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased', device=0)
 
         print ('preparing text features in advance ...')
-        self.text_features = text_feature_extractor(self.products_frame['title'])[:,0,:]
+        self.text_features = text_feature_extractor(list(self.products_frame['title']))[:,0,:]
         
         if transform is not None:
             self.transform = transform
