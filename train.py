@@ -142,6 +142,7 @@ if __name__ == "__main__":
             else:
                 embeddings_tensor = torch.cat([embeddings_tensor, features.detach().cpu()])
 
+    '''
             if images_tensor is None:
                 images_tensor = images.cpu()
             else:
@@ -152,6 +153,7 @@ if __name__ == "__main__":
         mat=embeddings_tensor[:500], label_img=images_tensor[:500]
     )
     print("\nembedding projection was saved !!")
+    '''
 
     df = pd.read_csv(args.train_csv_file)
 
