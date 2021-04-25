@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+from transformers import pipeline
 
 from tqdm import tqdm
 
@@ -23,9 +24,11 @@ class ProductPairDataset(Dataset):
         self.root_dir = root_dir
         self.train_mode = train_mode
 
-        self.images = []
-        self.labels = []
+        text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased')
 
+        print ('preparing text features in advance ...')
+        self.text_features = text_feature_extractor(self.products_frame['title'])[:,0,:]
+        
         if transform is not None:
             self.transform = transform
         else:
@@ -60,6 +63,7 @@ class ProductPairDataset(Dataset):
         label = int(self.products_frame.iloc[index]["label_group"])
 
         image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"]))
+        text_tensor = self.products_frame.iloc[index]["label_group"]
         label_tensor = torch.LongTensor([label])
 
         return image_tensor, label_tensor
