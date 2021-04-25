@@ -24,7 +24,8 @@ class ProductPairDataset(Dataset):
         self.root_dir = root_dir
         self.train_mode = train_mode
 
-        text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased')
+        #set gpu based pipeline
+        text_feature_extractor = pipeline(task='feature-extraction', model='distilbert-base-uncased', tokenizer='distilbert-base-uncased', device=0)
 
         print ('preparing text features in advance ...')
         self.text_features = text_feature_extractor(self.products_frame['title'])[:,0,:]
@@ -59,11 +60,10 @@ class ProductPairDataset(Dataset):
         return len(self.products_frame)
 
     def __getitem__(self, index):
-        #print (f'data len:{len(self.products_frame)}\tindex:{index}')
         label = int(self.products_frame.iloc[index]["label_group"])
 
         image_tensor = self.transform(PIL.Image.open(self.root_dir + os.sep + self.products_frame.iloc[index]["image"]))
-        text_tensor = self.products_frame.iloc[index]["label_group"]
+        text_tensor = self.text_features[index]
         label_tensor = torch.LongTensor([label])
 
-        return image_tensor, label_tensor
+        return image_tensor, text_tensor, label_tensor

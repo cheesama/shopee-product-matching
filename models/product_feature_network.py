@@ -18,7 +18,7 @@ import pandas as pd
 
 
 class ProductFeatureNet(nn.Module):
-    def __init__(self, backbone_net: str, feature_dim=256):
+    def __init__(self, backbone_net: str, feature_dim=768):
         super(ProductFeatureNet, self).__init__()
 
         self.feature_dim = feature_dim
@@ -27,9 +27,10 @@ class ProductFeatureNet(nn.Module):
         self.feature_layer = nn.Linear(self.backbone_net.fc.out_features, feature_dim, bias=False)
         nn.init.kaiming_uniform_(self.feature_layer.weight)
 
-    def forward(self, images):
-        features = self.backbone_net(images)
-        features = self.feature_layer(features)
+    def forward(self, images, text_features):
+        image_features = self.backbone_net(images)
+        image_features = self.feature_layer(image_features)
+        features = image_features + text_features
         features = F.normalize(features)
 
         return features
@@ -39,7 +40,7 @@ class ProductFeatureEncoder(pl.LightningModule):
     def __init__(
         self,
         model,
-        margin=0.5,
+        margin=0.2,
         lr=1e-3,
         lr_patience=2,
         lr_decay_ratio=0.5,
@@ -64,8 +65,8 @@ class ProductFeatureEncoder(pl.LightningModule):
             miner=miners.MultiSimilarityMiner(epsilon=self.margin)
         )
 
-    def forward(self, images):
-        features = self.model(images)
+    def forward(self, images, text_features):
+        features = self.model(images, text_features)
 
         return features
 
@@ -94,8 +95,8 @@ class ProductFeatureEncoder(pl.LightningModule):
     def training_step(self, train_batch, batch_idx):
         self.model.train()
 
-        images, labels = train_batch
-        features = self.model(images)
+        images, text_features, labels = train_batch
+        features = self.model(images, text_features)
 
         xbm_loss = self.loss_func(features, labels.squeeze(1))
         self.log("train/loss", xbm_loss, prog_bar=True)
@@ -105,10 +106,10 @@ class ProductFeatureEncoder(pl.LightningModule):
     def validation_step(self, validation_batch, batch_idx):
         self.model.eval()
 
-        images, labels = validation_batch
+        images, text_features, labels = validation_batch
 
         with torch.no_grad():
-            features = self.model(images)
+            features = self.model(images, text_features)
 
             xbm_loss = self.loss_func(features, labels.squeeze(1))
             self.log("val_loss", xbm_loss, prog_bar=True)

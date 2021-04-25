@@ -133,10 +133,10 @@ if __name__ == "__main__":
     images_tensor = None
     embeddings_tensor = None
 
-    for images, labels in tqdm(test_loader, desc="storing image features ..."):
+    for images, text_features, labels in tqdm(test_loader, desc="storing image features ..."):
         images = images.to(device)
         with torch.no_grad():
-            features = product_encoder.model(images)
+            features = product_encoder.model(images, text_features)
 
             if embeddings_tensor is None:
                 embeddings_tensor = features.cpu()
