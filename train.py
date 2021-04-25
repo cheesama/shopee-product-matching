@@ -164,7 +164,7 @@ if __name__ == "__main__":
                 list(df[df["label_group"] == df.iloc[i]["label_group"]]["posting_id"])
             )
         )
-    df["macthes"] = matches_column
+    df["matches"] = matches_column
 
     index = faiss.IndexFlatIP(args.feature_dim)
     index.add(embeddings_tensor.numpy())
@@ -192,8 +192,8 @@ if __name__ == "__main__":
 
             matches_pred.append(' '.join(each_matches_pred))
         
-        df['macthes_pred'] = matches_pred
-        df['f1'] = df.apply(lambda row:f1_score(row['matches'], row['macthes_pred']), axis=1)
+        df['matches_pred'] = matches_pred
+        df['f1'] = df.apply(lambda row:f1_score(row['matches'], row['matches_pred']), axis=1)
 
         print (f"f1 score of similarity threshold({threshold}): {df['f1'].mean()}")
 
