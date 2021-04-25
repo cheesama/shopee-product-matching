@@ -111,7 +111,8 @@ if __name__ == "__main__":
         progress_bar_refresh_rate=1,
         accelerator="ddp",
         max_epochs=args.epochs,
-        callbacks=[early_stopping, lr_monitor, checkpoint_callback],
+        #callbacks=[early_stopping, lr_monitor, checkpoint_callback],
+        callbacks=[lr_monitor, checkpoint_callback],
         replace_sampler_ddp=False,
     )
 
