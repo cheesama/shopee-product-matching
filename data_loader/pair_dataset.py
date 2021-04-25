@@ -30,8 +30,8 @@ class ProductPairDataset(Dataset):
 
         self.text_features = None
         for i in tqdm(range(len(self.products_frame) // self.batch_size + 1), desc='preparing text features in advance ...'):
-            extracted_features = text_feature_extractor(list(self.products_frame['title'])[(i * self.batch_size):((i + 1) * self.batch_size)])[:,0,:]
-            extracted_features = torch.FloatTensor(extracted_features)
+            extracted_features = text_feature_extractor(list(self.products_frame['title'])[(i * self.batch_size):((i + 1) * self.batch_size)])
+            extracted_features = torch.FloatTensor(extracted_features)[:,0,:]
             if self.text_features is None:
                 self.text_features = extracted_features
             else:
