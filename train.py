@@ -19,6 +19,7 @@ import pandas as pd
 import multiprocessing
 import numpy as np
 import faiss
+import gc
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -117,6 +118,13 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     product_encoder.model = product_encoder.model.to(device)
 
+    del dataset_df
+    del train_dataset
+    del train_loader
+    del valid_dataset
+    del valid_loader
+    gc.collect()
+
     images_tensor = None
     embeddings_tensor = None
 
@@ -170,6 +178,9 @@ if __name__ == "__main__":
     print("\nembedding projection was saved !!")
 
     # search similarity threshold for optimal f1 score
+    max_f1 = 0
+    similariry_threshold = 0.0
+
     for threshold in tqdm(list(np.arange(0.5, 1.0, 0.05)), desc='searching similarity threshold for optimal f1 score ...'):
         matches_pred = []
         for distance, index in zip(distances, indices):
@@ -184,3 +195,9 @@ if __name__ == "__main__":
         df['f1'] = df.apply(lambda row:f1_score(row['matches'], row['macthes_pred']), axis=1)
 
         print (f"f1 score of similarity threshold({threshold}): {df['f1'].mean()}")
+
+        if df['f1'].mean() > max_f1:
+            similariry_threshold = threshold
+            max_f1 = df['f1'].mean()
+
+    print (f"best f1 score : {max_f1},\tsimilarity threshold : {similariry_threshold}")
