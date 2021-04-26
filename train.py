@@ -110,7 +110,7 @@ if __name__ == "__main__":
         gpus=torch.cuda.device_count(),
         progress_bar_refresh_rate=1,
         accelerator="ddp",
-        max_epochs=args.epochs,
+        max_epochs=int(args.epochs),
         #callbacks=[early_stopping, lr_monitor, checkpoint_callback],
         callbacks=[lr_monitor, checkpoint_callback],
         replace_sampler_ddp=False,
