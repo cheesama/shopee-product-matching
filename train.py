@@ -55,16 +55,16 @@ if __name__ == "__main__":
     )
     product_encoder = ProductFeatureEncoder(
         model=embedding_net,
-        lr=args.lr,
-        margin=args.margin,
-        memory_batch_max_num=args.memory_batch_max_num,
+        lr=float(args.lr),
+        margin=float(args.margin),
+        memory_batch_max_num=int(args.memory_batch_max_num),
     )
 
     # Init DataLoader from Custom Dataset
     dataset_df = pd.read_csv(args.train_csv_file)
     dataset_df = shuffle(dataset_df)
 
-    train_df = dataset_df[: int(len(dataset_df) * args.train_portion)]
+    train_df = dataset_df[: int(len(dataset_df) * float(args.train_portion))]
     train_batch_sampler = PositivePairAugBatchSampler(train_df)
     train_dataset = ProductPairDataset(
         df=train_df,
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(
         train_dataset,
         num_workers=multiprocessing.cpu_count(),
-        #batch_size=args.batch,
+        #batch_size=int(args.batch),
         #shuffle=True,
         batch_sampler=train_batch_sampler,
     )
@@ -98,10 +98,10 @@ if __name__ == "__main__":
         train_mode=False,
     )
     test_loader = DataLoader(
-        test_dataset, num_workers=multiprocessing.cpu_count(), batch_size=args.batch
+        test_dataset, num_workers=multiprocessing.cpu_count(), batch_size=int(args.batch)
     )
 
-    early_stopping = EarlyStopping("val_loss", patience=args.early_stop_patience)
+    early_stopping = EarlyStopping("val_loss", patience=int(args.early_stop_patience))
     lr_monitor = LearningRateMonitor(logging_interval="step")
     checkpoint_callback = ModelCheckpoint(monitor="val_loss", mode="min")
 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         )
     df["matches"] = matches_column
 
-    index = faiss.IndexFlatIP(args.feature_dim)
+    index = faiss.IndexFlatIP(int(args.feature_dim))
     index.add(embeddings_tensor.numpy())
     distances, indices = index.search(
         embeddings_tensor.numpy(), k=50
